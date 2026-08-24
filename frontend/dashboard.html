@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -15,34 +15,13 @@
   
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');}</script>
+<script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');document.documentElement.setAttribute('data-bs-theme', 'dark');}</script>
 </head>
 <body>
 
   <div class="app-wrapper">
     <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <a href="dashboard.html" class="sidebar-brand">
-        <i class="bi bi-hexagon-fill"></i> AttritionPredict
-      </a>
-      
-      <div class="sidebar-nav">
-        <div class="nav-group-title">Main</div>
-        <a href="dashboard.html" class="nav-link active"><i class="bi bi-grid"></i> Dashboard</a>
-        <a href="employees.html" class="nav-link"><i class="bi bi-people"></i> Employees</a>
-        
-        <div class="nav-group-title">Analysis</div>
-        <a href="prediction.html" class="nav-link"><i class="bi bi-magic"></i> Attrition Prediction</a>
-        <a href="analytics.html" class="nav-link"><i class="bi bi-bar-chart"></i> Analytics</a>
-        
-        <div class="nav-group-title">Reports</div>
-        <a href="high-risk.html" class="nav-link"><i class="bi bi-exclamation-triangle"></i> High-Risk Employees</a>
-        <a href="history.html" class="nav-link"><i class="bi bi-clock-history"></i> Prediction History</a>
-        
-        <div class="nav-group-title">System</div>
-        <a href="settings.html" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
-      </div>
-    </aside>
+    <div id="sidebar-container"></div>
 
     <!-- Main Content Area -->
     <main class="main-content">
@@ -193,9 +172,9 @@
                 <button class="btn btn-sm border">Report</button>
               </div>
               
-              <div class="position-relative mt-3 mx-auto" style="width: 150px; height: 150px;">
+              <div class="position-relative mx-auto mt-3" style="width: 180px;">
                 <canvas id="targetChart"></canvas>
-                <div class="position-absolute top-50 start-50 translate-middle text-center mt-2">
+                <div class="position-absolute bottom-0 start-50 translate-middle-x text-center w-100 pb-2">
                   <h3 class="mb-0 fw-bold" id="targetValue">-</h3>
                   <small class="text-success" id="targetChange">-</small>
                 </div>
@@ -258,7 +237,7 @@
       // Set Trend Badges
       const setTrend = (id, val, invert = false) => {
         const el = document.getElementById(id);
-        el.textContent = (val > 0 ? '↑ ' : '↓ ') + Math.abs(val) + '%';
+        el.textContent = (val > 0 ? 'â†‘ ' : 'â†“ ') + Math.abs(val) + '%';
         let isGood = val > 0;
         if (invert) isGood = !isGood; // For attrition, lower is better
         
@@ -361,14 +340,15 @@
             data: [ctxData.retentionCurrent, 100 - ctxData.retentionCurrent],
             backgroundColor: ['#ff6b00', '#e2e8f0'],
             borderWidth: 0,
-            cutout: '80%',
+            cutout: '75%',
             rotation: 270,
             circumference: 180,
           }]
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,
+          maintainAspectRatio: true,
+          aspectRatio: 2,
           plugins: { legend: { display: false }, tooltip: { enabled: false } }
         }
       });
@@ -422,4 +402,5 @@
   </script>
 </body>
 </html>
+
 

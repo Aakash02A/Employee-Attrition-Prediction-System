@@ -12,13 +12,21 @@ It implements a modern, responsive, 3-column SaaS dashboard layout.
 ## File Structure
 - `login.html`: The authentication screen with simulated login logic.
 - `dashboard.html`: The main dashboard featuring KPIs, high-level charts, and contextual retention stats.
+- `employees.html`: Employee directory — searchable, filterable, paginated table with add/edit/delete UI (stubbed).
 - `prediction.html`: The form to input employee data and run ML predictions.
 - `analytics.html`: Detailed breakdowns of attrition drivers across the organization.
 - `high-risk.html`: A sortable, filterable list of employees flagged with High/Medium risk.
-- `history.html`: A paginated log of past predictions.
-- `css/styles.css`: All custom styling, design tokens, and layout overrides.
-- `js/app.js`: Shared application logic (sidebar toggling, active links, logout).
-- `js/mock-data.js`: Centralized mock JSON data simulating backend API responses.
+- `history.html`: A paginated, filterable log of past predictions.
+- `settings.html`: User profile, ML model configuration, notification preferences, and security tabs.
+- `css/styles.css`: All custom styling, design tokens, and layout overrides. Includes a dark theme (`data-theme="dark"`).
+- `js/app.js`: Shared application logic (sidebar toggling, active links, logout, theme toggle).
+- `js/mock-data.js`: Centralized mock JSON data simulating backend API responses — including `analytics`, used by `analytics.html` so all pages read from one source.
+
+## Change Log
+- Fixed a UTF-8 BOM and mojibake arrow characters (↑/↓) in `dashboard.html` that were introduced when the file was saved in a non-UTF-8-safe editor.
+- Removed `temp_script.js`, an unreferenced leftover copy of the dashboard's inline chart-init script.
+- Moved `analytics.html`'s chart data out of inline hardcoded arrays into `MockData.analytics` in `js/mock-data.js`, matching the pattern used by every other page.
+- Wired up the previously non-functional date filter on `history.html`.
 
 ## Backend Integration Guide (Phase 3+)
 The current application uses static/mock data to demonstrate functionality. When wiring up the real backend, look for these areas:

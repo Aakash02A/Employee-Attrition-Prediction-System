@@ -41,6 +41,39 @@ const MockData = {
     }
   },
 
+  // --- Analytics Page Charts ---
+  analytics: {
+    byDepartment: {
+      labels: ['Sales', 'R&D', 'HR', 'Support'],
+      data: [65, 80, 15, 14]
+    },
+    byRole: {
+      labels: ['Sales Exec', 'Research Sci', 'Lab Tech', 'Manager', 'HR'],
+      data: [45, 35, 40, 15, 10]
+    },
+    byAgeGroup: {
+      labels: ['18-25', '26-35', '36-45', '46-55', '55+'],
+      data: [45, 80, 30, 20, 9]
+    },
+    bySalaryRange: {
+      labels: ['< $2.5k', '$2.5k-$5k', '$5k-$10k', '$10k+'],
+      data: [75, 60, 35, 14]
+    },
+    byOvertime: {
+      labels: ['Yes', 'No'],
+      left: [95, 30],
+      stayed: [150, 750]
+    },
+    byJobSatisfaction: {
+      labels: ['1 (Low)', '2', '3', '4 (High)'],
+      data: [66, 46, 73, 52]
+    },
+    byYearsAtCompany: {
+      labels: ['0-2 Years', '3-5 Years', '6-10 Years', '11+ Years'],
+      data: [90, 50, 30, 14]
+    }
+  },
+
   // --- Right Panel Specific ---
   contextual: {
     retentionTarget: 85, // %

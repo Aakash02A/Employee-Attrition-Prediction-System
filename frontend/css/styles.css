@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --primary: #ff6b00;
   --primary-hover: #e66000;
   --primary-light: #fff0e6;
@@ -442,13 +442,13 @@ body {
   background-color: var(--bg-color);
 }
 .login-card {
-  width: 100%;
-  max-width: 400px;
-  padding: 2.5rem;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
-  background: white;
-}
+    width: 100%;
+    max-width: 400px;
+    padding: 2.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    background: var(--card-bg);
+  }
 .login-logo {
   text-align: center;
   margin-bottom: 2rem;
@@ -560,4 +560,5 @@ body {
 [data-theme="dark"] .table tbody tr:hover td {
   background-color: rgba(255, 255, 255, 0.05) !important;
 }
+
 

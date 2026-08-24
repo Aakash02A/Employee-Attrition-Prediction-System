@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -14,34 +14,13 @@
   <link rel="stylesheet" href="css/styles.css">
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');}</script>
+<script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');document.documentElement.setAttribute('data-bs-theme', 'dark');}</script>
 </head>
 <body>
 
   <div class="app-wrapper">
     <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <a href="dashboard.html" class="sidebar-brand">
-        <i class="bi bi-hexagon-fill"></i> AttritionPredict
-      </a>
-      
-      <div class="sidebar-nav">
-        <div class="nav-group-title">Main</div>
-        <a href="dashboard.html" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a>
-        <a href="employees.html" class="nav-link"><i class="bi bi-people"></i> Employees</a>
-        
-        <div class="nav-group-title">Analysis</div>
-        <a href="prediction.html" class="nav-link"><i class="bi bi-magic"></i> Attrition Prediction</a>
-        <a href="analytics.html" class="nav-link active"><i class="bi bi-bar-chart"></i> Analytics</a>
-        
-        <div class="nav-group-title">Reports</div>
-        <a href="high-risk.html" class="nav-link"><i class="bi bi-exclamation-triangle"></i> High-Risk Employees</a>
-        <a href="history.html" class="nav-link"><i class="bi bi-clock-history"></i> Prediction History</a>
-        
-        <div class="nav-group-title">System</div>
-        <a href="settings.html" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
-      </div>
-    </aside>
+    <div id="sidebar-container"></div>
 
     <!-- Main Content Area -->
     <main class="main-content">
@@ -179,13 +158,19 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/mock-data.js"></script>
   <script src="js/app.js"></script>
   
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       Chart.defaults.font.family = 'Inter';
       Chart.defaults.color = '#718096';
-      
+
+      // Pulled from the shared MockData source (js/mock-data.js) so this
+      // page stays in sync with the rest of the app. In Phase 3+, replace
+      // window.MockData.analytics with the response from /api/analytics/*.
+      const a = window.MockData.analytics;
+
       const commonOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -200,8 +185,8 @@
       new Chart(document.getElementById('chartDept'), {
         type: 'bar',
         data: {
-          labels: ['Sales', 'R&D', 'HR', 'Support'],
-          datasets: [{ data: [65, 80, 15, 14], backgroundColor: '#ff6b00', borderRadius: 4 }]
+          labels: a.byDepartment.labels,
+          datasets: [{ data: a.byDepartment.data, backgroundColor: '#ff6b00', borderRadius: 4 }]
         },
         options: commonOptions
       });
@@ -210,8 +195,8 @@
       new Chart(document.getElementById('chartRole'), {
         type: 'bar',
         data: {
-          labels: ['Sales Exec', 'Research Sci', 'Lab Tech', 'Manager', 'HR'],
-          datasets: [{ data: [45, 35, 40, 15, 10], backgroundColor: '#f59e0b', borderRadius: 4 }]
+          labels: a.byRole.labels,
+          datasets: [{ data: a.byRole.data, backgroundColor: '#f59e0b', borderRadius: 4 }]
         },
         options: commonOptions
       });
@@ -220,8 +205,8 @@
       new Chart(document.getElementById('chartAge'), {
         type: 'bar',
         data: {
-          labels: ['18-25', '26-35', '36-45', '46-55', '55+'],
-          datasets: [{ data: [45, 80, 30, 20, 9], backgroundColor: '#10b981', borderRadius: 4 }]
+          labels: a.byAgeGroup.labels,
+          datasets: [{ data: a.byAgeGroup.data, backgroundColor: '#10b981', borderRadius: 4 }]
         },
         options: commonOptions
       });
@@ -230,8 +215,8 @@
       new Chart(document.getElementById('chartSalary'), {
         type: 'bar',
         data: {
-          labels: ['< $2.5k', '$2.5k-$5k', '$5k-$10k', '$10k+'],
-          datasets: [{ data: [75, 60, 35, 14], backgroundColor: '#6366f1', borderRadius: 4 }]
+          labels: a.bySalaryRange.labels,
+          datasets: [{ data: a.bySalaryRange.data, backgroundColor: '#6366f1', borderRadius: 4 }]
         },
         options: commonOptions
       });
@@ -240,10 +225,10 @@
       new Chart(document.getElementById('chartOvertime'), {
         type: 'bar',
         data: {
-          labels: ['Yes', 'No'],
+          labels: a.byOvertime.labels,
           datasets: [
-            { label: 'Left', data: [95, 30], backgroundColor: '#ef4444', borderRadius: 4 },
-            { label: 'Stayed', data: [150, 750], backgroundColor: '#e2e8f0', borderRadius: 4 }
+            { label: 'Left', data: a.byOvertime.left, backgroundColor: '#ef4444', borderRadius: 4 },
+            { label: 'Stayed', data: a.byOvertime.stayed, backgroundColor: '#e2e8f0', borderRadius: 4 }
           ]
         },
         options: {
@@ -256,19 +241,19 @@
       new Chart(document.getElementById('chartSatisfaction'), {
         type: 'bar',
         data: {
-          labels: ['1 (Low)', '2', '3', '4 (High)'],
-          datasets: [{ data: [66, 46, 73, 52], backgroundColor: '#8b5cf6', borderRadius: 4 }]
+          labels: a.byJobSatisfaction.labels,
+          datasets: [{ data: a.byJobSatisfaction.data, backgroundColor: '#8b5cf6', borderRadius: 4 }]
         },
         options: commonOptions
       });
 
-      // 7. Years at Company (Grouped Bar representation)
+      // 7. Years at Company
       new Chart(document.getElementById('chartYears'), {
         type: 'bar',
         data: {
-          labels: ['0-2 Years', '3-5 Years', '6-10 Years', '11+ Years'],
+          labels: a.byYearsAtCompany.labels,
           datasets: [
-            { label: 'Attrition', data: [90, 50, 30, 14], backgroundColor: '#ff6b00', borderRadius: 4 }
+            { label: 'Attrition', data: a.byYearsAtCompany.data, backgroundColor: '#ff6b00', borderRadius: 4 }
           ]
         },
         options: commonOptions
@@ -278,4 +263,6 @@
   </script>
 </body>
 </html>
+
+
 
