@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prediction History - AttritionPredict</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">
+        <i class="bi bi-hexagon-fill"></i> AttritionPredict
+      </a>
+      
+      <div class="sidebar-nav">
+        <div class="nav-group-title">Main</div>
+        <a href="dashboard.html" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a>
+        <a href="#" class="nav-link"><i class="bi bi-people"></i> Employees</a>
+        
+        <div class="nav-group-title">Analysis</div>
+        <a href="prediction.html" class="nav-link"><i class="bi bi-magic"></i> Attrition Prediction</a>
+        <a href="analytics.html" class="nav-link"><i class="bi bi-bar-chart"></i> Analytics</a>
+        
+        <div class="nav-group-title">Reports</div>
+        <a href="high-risk.html" class="nav-link"><i class="bi bi-exclamation-triangle"></i> High-Risk Employees</a>
+        <a href="history.html" class="nav-link active"><i class="bi bi-clock-history"></i> Prediction History</a>
+        
+        <div class="nav-group-title">System</div>
+        <a href="#" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-list mobile-toggle" id="mobileToggle"></i>
+          <div class="header-search position-relative">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="form-control" placeholder="Search anything...">
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <button class="icon-btn"><i class="bi bi-sun"></i></button>
+          <button class="icon-btn position-relative">
+            <i class="bi bi-bell"></i>
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+          </button>
+          
+          <div class="user-profile dropdown">
+            <div class="d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="user-info d-none d-sm-flex me-2">
+                <span class="user-name">Robert Brown</span>
+                <span class="user-role">HR Manager</span>
+              </div>
+              <img src="https://i.pravatar.cc/150?u=robert" alt="User" class="user-avatar" style="object-fit: cover;">
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+              <li><a class="dropdown-item" href="#">Profile</a></li>
+              <li><a class="dropdown-item" href="#">Settings</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Page Content -->
+      <div class="page-content-wrapper">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Prediction History</h1>
+            <div class="page-subtitle">Log of all historical ML predictions.</div>
+          </div>
+          <button class="btn btn-outline-secondary"><i class="bi bi-download me-1"></i> Export CSV</button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="saas-card py-3 mb-4">
+          <div class="row g-3 align-items-center">
+            <div class="col-md-3">
+              <div class="position-relative">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-2 text-muted"></i>
+                <input type="text" class="form-control form-control-sm ps-4" id="searchEmp" placeholder="Search Employee Code...">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select form-select-sm" id="filterResult">
+                <option value="All">All Predictions</option>
+                <option value="Leave">Leave</option>
+                <option value="Stay">Stay</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <input type="date" class="form-control form-control-sm" id="filterDate">
+            </div>
+          </div>
+        </div>
+
+        <div class="saas-card p-0 overflow-hidden mb-4">
+          <div class="table-responsive border-0">
+            <table class="table table-hover mb-0" id="historyTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Employee Code</th>
+                  <th>Prediction</th>
+                  <th>Probability</th>
+                  <th>Model Version</th>
+                  <th>Requested By</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center">
+          <div class="text-muted small" id="pageInfo">Showing 1 to 10 of 15 entries</div>
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item disabled" id="btnPrev"><a class="page-link" href="#" onclick="changePage(-1)">Previous</a></li>
+            <li class="page-item active"><a class="page-link" href="#" id="pageNum">1</a></li>
+            <li class="page-item" id="btnNext"><a class="page-link" href="#" onclick="changePage(1)">Next</a></li>
+          </ul>
+        </nav>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/mock-data.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const allHistory = window.MockData.history;
+      let currentData = [...allHistory];
+      
+      const tbody = document.getElementById('historyTableBody');
+      const searchEmp = document.getElementById('searchEmp');
+      const filterResult = document.getElementById('filterResult');
+      
+      // Pagination state
+      let currentPage = 1;
+      const itemsPerPage = 10;
+      
+      const renderTable = () => {
+        tbody.innerHTML = '';
+        
+        // Paging logic
+        const total = currentData.length;
+        const totalPages = Math.ceil(total / itemsPerPage);
+        
+        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+        
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = Math.min(start + itemsPerPage, total);
+        
+        const pageData = currentData.slice(start, end);
+        
+        if (pageData.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No history records found.</td></tr>';
+          document.getElementById('pageInfo').textContent = 'Showing 0 entries';
+          document.getElementById('btnPrev').classList.add('disabled');
+          document.getElementById('btnNext').classList.add('disabled');
+          return;
+        }
+        
+        document.getElementById('pageInfo').textContent = `Showing ${start + 1} to ${end} of ${total} entries`;
+        document.getElementById('pageNum').textContent = currentPage;
+        
+        document.getElementById('btnPrev').classList.toggle('disabled', currentPage === 1);
+        document.getElementById('btnNext').classList.toggle('disabled', currentPage === totalPages);
+        
+        pageData.forEach(item => {
+          const isLeave = item.prediction.includes('Leave');
+          const predClass = isLeave ? 'text-danger fw-bold' : 'text-success fw-bold';
+          
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${item.date}</td>
+            <td class="fw-bold text-dark">${item.empCode}</td>
+            <td class="${predClass}">${item.prediction}</td>
+            <td>${item.probability}%</td>
+            <td class="text-muted">${item.modelVersion}</td>
+            <td>${item.requestedBy}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      };
+      
+      window.changePage = (dir) => {
+        currentPage += dir;
+        renderTable();
+      };
+      
+      // Filtering logic
+      const applyFilters = () => {
+        const search = searchEmp.value.toLowerCase();
+        const res = filterResult.value;
+        
+        let filtered = allHistory;
+        
+        if (search) {
+          filtered = filtered.filter(h => h.empCode.toLowerCase().includes(search));
+        }
+        if (res !== 'All') {
+          filtered = filtered.filter(h => h.prediction.includes(res));
+        }
+        
+        currentData = filtered;
+        currentPage = 1; // Reset to page 1 on filter change
+        renderTable();
+      };
+      
+      searchEmp.addEventListener('input', applyFilters);
+      filterResult.addEventListener('change', applyFilters);
+      
+      // Initial render
+      renderTable();
+    });
+  </script>
+</body>
+</html>

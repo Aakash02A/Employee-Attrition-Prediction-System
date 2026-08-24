@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>High-Risk Employees - AttritionPredict</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">
+        <i class="bi bi-hexagon-fill"></i> AttritionPredict
+      </a>
+      
+      <div class="sidebar-nav">
+        <div class="nav-group-title">Main</div>
+        <a href="dashboard.html" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a>
+        <a href="#" class="nav-link"><i class="bi bi-people"></i> Employees</a>
+        
+        <div class="nav-group-title">Analysis</div>
+        <a href="prediction.html" class="nav-link"><i class="bi bi-magic"></i> Attrition Prediction</a>
+        <a href="analytics.html" class="nav-link"><i class="bi bi-bar-chart"></i> Analytics</a>
+        
+        <div class="nav-group-title">Reports</div>
+        <a href="high-risk.html" class="nav-link active"><i class="bi bi-exclamation-triangle"></i> High-Risk Employees</a>
+        <a href="history.html" class="nav-link"><i class="bi bi-clock-history"></i> Prediction History</a>
+        
+        <div class="nav-group-title">System</div>
+        <a href="#" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-list mobile-toggle" id="mobileToggle"></i>
+          <div class="header-search position-relative">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="form-control" placeholder="Search anything...">
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <button class="icon-btn"><i class="bi bi-sun"></i></button>
+          <button class="icon-btn position-relative">
+            <i class="bi bi-bell"></i>
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+          </button>
+          
+          <div class="user-profile dropdown">
+            <div class="d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="user-info d-none d-sm-flex me-2">
+                <span class="user-name">Robert Brown</span>
+                <span class="user-role">HR Manager</span>
+              </div>
+              <img src="https://i.pravatar.cc/150?u=robert" alt="User" class="user-avatar" style="object-fit: cover;">
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+              <li><a class="dropdown-item" href="#">Profile</a></li>
+              <li><a class="dropdown-item" href="#">Settings</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Page Content -->
+      <div class="page-content-wrapper">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">High-Risk Employees</h1>
+            <div class="page-subtitle">List of employees with >70% attrition probability.</div>
+          </div>
+          <button class="btn btn-outline-secondary"><i class="bi bi-download me-1"></i> Export List</button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="saas-card py-3 mb-4">
+          <div class="row g-3 align-items-center">
+            <div class="col-md-auto fw-bold text-dark me-2">
+              <i class="bi bi-funnel me-1"></i> Filters
+            </div>
+            <div class="col-md-3">
+              <select class="form-select form-select-sm" id="filterDept">
+                <option value="All">All Departments</option>
+                <option value="Sales">Sales</option>
+                <option value="Research & Development">Research & Development</option>
+                <option value="Human Resources">Human Resources</option>
+                <option value="Support">Support</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select form-select-sm" id="filterRisk">
+                <option value="All">All Risk Levels</option>
+                <option value="High">High Risk (>70%)</option>
+                <option value="Medium">Medium Risk (40-70%)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="saas-card p-0 overflow-hidden">
+          <div class="table-responsive border-0">
+            <table class="table table-hover mb-0" id="riskTable">
+              <thead>
+                <tr>
+                  <th onclick="sortTable(0)">Emp Code <i class="bi bi-arrow-down-up float-end"></i></th>
+                  <th onclick="sortTable(1)">Department <i class="bi bi-arrow-down-up float-end"></i></th>
+                  <th onclick="sortTable(2)">Job Role <i class="bi bi-arrow-down-up float-end"></i></th>
+                  <th onclick="sortTable(3)">Risk Level <i class="bi bi-arrow-down-up float-end"></i></th>
+                  <th onclick="sortTable(4, true)">Probability <i class="bi bi-arrow-down-up float-end"></i></th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="riskTableBody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- History Modal -->
+  <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-bottom-0 pb-0">
+          <h5 class="modal-title fw-bold">Prediction History: <span id="modalEmpCode"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead class="bg-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Prediction</th>
+                  <th>Probability</th>
+                  <th>Model Version</th>
+                </tr>
+              </thead>
+              <tbody id="modalHistoryBody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer border-top-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/mock-data.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const allEmployees = window.MockData.employees;
+      
+      // Filter for only high/med risk for this specific view initially
+      let currentData = allEmployees.filter(e => e.riskLevel === 'High' || e.riskLevel === 'Medium');
+      
+      const tbody = document.getElementById('riskTableBody');
+      const filterDept = document.getElementById('filterDept');
+      const filterRisk = document.getElementById('filterRisk');
+      
+      const renderTable = (data) => {
+        tbody.innerHTML = '';
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No employees match the filters.</td></tr>';
+          return;
+        }
+        
+        data.forEach(emp => {
+          let badgeClass = '';
+          if (emp.riskLevel === 'High') badgeClass = 'badge-high';
+          if (emp.riskLevel === 'Medium') badgeClass = 'badge-med';
+          if (emp.riskLevel === 'Low') badgeClass = 'badge-low';
+          
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="fw-bold">${emp.empCode}</td>
+            <td>${emp.department}</td>
+            <td>${emp.jobRole}</td>
+            <td><span class="d-inline-block px-2 py-1 rounded fw-bold ${badgeClass}" style="font-size:0.75rem;">${emp.riskLevel}</span></td>
+            <td><div class="d-flex align-items-center">
+                  <span class="me-2 fw-bold">${emp.probability}%</span>
+                  <div class="progress flex-grow-1" style="height: 6px;">
+                    <div class="progress-bar ${emp.riskLevel === 'High' ? 'bg-danger' : 'bg-warning'}" style="width: ${emp.probability}%"></div>
+                  </div>
+                </div>
+            </td>
+            <td><button class="btn btn-sm btn-outline-primary" onclick="viewHistory('${emp.empCode}')">View</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      };
+      
+      // Initial render
+      renderTable(currentData);
+      
+      // Filtering logic
+      const applyFilters = () => {
+        const d = filterDept.value;
+        const r = filterRisk.value;
+        
+        let filtered = allEmployees.filter(e => e.riskLevel !== 'Low'); // Base is High/Med
+        
+        if (d !== 'All') {
+          filtered = filtered.filter(e => e.department === d);
+        }
+        if (r !== 'All') {
+          filtered = filtered.filter(e => e.riskLevel === r);
+        }
+        
+        currentData = filtered;
+        renderTable(currentData);
+      };
+      
+      filterDept.addEventListener('change', applyFilters);
+      filterRisk.addEventListener('change', applyFilters);
+      
+      // Modal Logic
+      window.viewHistory = (empCode) => {
+        document.getElementById('modalEmpCode').textContent = empCode;
+        const hBody = document.getElementById('modalHistoryBody');
+        
+        // Generate some fake history for this employee based on current mock logic
+        const hist = window.MockData.history.filter(h => h.empCode === empCode);
+        
+        // If no history in mock, generate a dummy one
+        let historyData = hist.length > 0 ? hist : [
+          { date: '2024-07-15', prediction: 'Leave', probability: 78, modelVersion: 'v2.1.0' },
+          { date: '2024-06-15', prediction: 'Stay (At Risk)', probability: 65, modelVersion: 'v2.0.1' },
+          { date: '2024-05-15', prediction: 'Stay', probability: 40, modelVersion: 'v2.0.1' }
+        ];
+        
+        hBody.innerHTML = historyData.map(h => `
+          <tr>
+            <td>${h.date}</td>
+            <td class="fw-bold ${h.prediction.includes('Leave') ? 'text-danger' : 'text-success'}">${h.prediction}</td>
+            <td>${h.probability}%</td>
+            <td class="text-muted">${h.modelVersion}</td>
+          </tr>
+        `).join('');
+        
+        const modal = new bootstrap.Modal(document.getElementById('historyModal'));
+        modal.show();
+      };
+      
+      // Simple Sort Logic
+      let sortAsc = true;
+      let lastCol = -1;
+      
+      window.sortTable = (colIndex, isNumeric = false) => {
+        if (lastCol === colIndex) {
+          sortAsc = !sortAsc;
+        } else {
+          sortAsc = true;
+          lastCol = colIndex;
+        }
+        
+        const keys = ['empCode', 'department', 'jobRole', 'riskLevel', 'probability'];
+        const key = keys[colIndex];
+        
+        currentData.sort((a, b) => {
+          let valA = a[key];
+          let valB = b[key];
+          
+          if (isNumeric) {
+            return sortAsc ? valA - valB : valB - valA;
+          }
+          
+          valA = valA.toString().toLowerCase();
+          valB = valB.toString().toLowerCase();
+          
+          if (valA < valB) return sortAsc ? -1 : 1;
+          if (valA > valB) return sortAsc ? 1 : -1;
+          return 0;
+        });
+        
+        renderTable(currentData);
+      };
+    });
+  </script>
+</body>
+</html>

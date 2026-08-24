@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - AttritionPredict</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">
+        <i class="bi bi-hexagon-fill"></i> AttritionPredict
+      </a>
+      
+      <div class="sidebar-nav">
+        <div class="nav-group-title">Main</div>
+        <a href="dashboard.html" class="nav-link active"><i class="bi bi-grid"></i> Dashboard</a>
+        <a href="#" class="nav-link"><i class="bi bi-people"></i> Employees</a>
+        
+        <div class="nav-group-title">Analysis</div>
+        <a href="prediction.html" class="nav-link"><i class="bi bi-magic"></i> Attrition Prediction</a>
+        <a href="analytics.html" class="nav-link"><i class="bi bi-bar-chart"></i> Analytics</a>
+        
+        <div class="nav-group-title">Reports</div>
+        <a href="high-risk.html" class="nav-link"><i class="bi bi-exclamation-triangle"></i> High-Risk Employees</a>
+        <a href="history.html" class="nav-link"><i class="bi bi-clock-history"></i> Prediction History</a>
+        
+        <div class="nav-group-title">System</div>
+        <a href="#" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-list mobile-toggle" id="mobileToggle"></i>
+          <div class="header-search position-relative">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="form-control" placeholder="Search anything...">
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <button class="icon-btn"><i class="bi bi-sun"></i></button>
+          <button class="icon-btn position-relative">
+            <i class="bi bi-bell"></i>
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+          </button>
+          
+          <div class="user-profile dropdown">
+            <div class="d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="user-info d-none d-sm-flex me-2">
+                <span class="user-name">Robert Brown</span>
+                <span class="user-role">HR Manager</span>
+              </div>
+              <img src="https://i.pravatar.cc/150?u=robert" alt="User" class="user-avatar" style="object-fit: cover;">
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+              <li><a class="dropdown-item" href="#">Profile</a></li>
+              <li><a class="dropdown-item" href="#">Settings</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Page Content -->
+      <div class="page-content-wrapper">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Dashboard</h1>
+            <div class="page-subtitle" id="dateRange"></div>
+          </div>
+          <a href="prediction.html" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> New Prediction</a>
+        </div>
+
+        <!-- 3-Column Grid Layout -->
+        <div class="content-grid">
+          
+          <!-- Center Column (Main Data) -->
+          <div class="center-col">
+            
+            <!-- KPI Cards Row -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-3 col-sm-6">
+                <div class="saas-card h-100 mb-0">
+                  <div class="card-title-sm">Total Employees</div>
+                  <div class="d-flex justify-content-between align-items-end">
+                    <div class="kpi-value" id="kpiTotalEmp">-</div>
+                    <span class="trend-badge trend-up" id="kpiTotalTrend">-</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="saas-card h-100 mb-0">
+                  <div class="card-title-sm">Attrition Count</div>
+                  <div class="d-flex justify-content-between align-items-end">
+                    <div class="kpi-value" id="kpiAttrCount">-</div>
+                    <span class="trend-badge trend-up" id="kpiAttrTrend">-</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="saas-card h-100 mb-0">
+                  <div class="card-title-sm">Attrition Rate</div>
+                  <div class="d-flex justify-content-between align-items-end">
+                    <div class="kpi-value" id="kpiAttrRate">-</div>
+                    <span class="trend-badge trend-up" id="kpiRateTrend">-</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <div class="saas-card h-100 mb-0">
+                  <div class="card-title-sm">Avg Probability</div>
+                  <div class="d-flex justify-content-between align-items-end">
+                    <div class="kpi-value" id="kpiAvgProb">-</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="row g-3 mb-3">
+              <div class="col-lg-8">
+                <div class="saas-card h-100 mb-0">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="card-title-sm mb-0 text-dark">Attrition Trend (Last 6 Mos)</div>
+                    <button class="btn btn-sm btn-outline-secondary">Download Report</button>
+                  </div>
+                  <div style="height: 250px;">
+                    <canvas id="trendChart"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="saas-card h-100 mb-0">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="card-title-sm mb-0 text-dark">Risk Distribution</div>
+                    <a href="analytics.html" class="text-primary text-decoration-none small">View All</a>
+                  </div>
+                  <div style="height: 200px;" class="d-flex justify-content-center">
+                    <canvas id="riskChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Charts Row 2 -->
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="saas-card h-100 mb-0">
+                  <div class="card-title-sm text-dark">Attrition by Department</div>
+                  <div style="height: 220px;">
+                    <canvas id="deptChart"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="saas-card h-100 mb-0">
+                  <div class="card-title-sm text-dark">Attrition by Job Role</div>
+                  <div style="height: 220px;">
+                    <canvas id="roleChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column (Contextual Panel) -->
+          <div class="right-col d-none d-lg-block">
+            <!-- Retention Target -->
+            <div class="saas-card text-center">
+              <div class="card-title-sm text-dark d-flex justify-content-between align-items-center">
+                <span>Retention Target</span>
+                <button class="btn btn-sm border">Report</button>
+              </div>
+              
+              <div class="position-relative mt-3 mx-auto" style="width: 150px; height: 150px;">
+                <canvas id="targetChart"></canvas>
+                <div class="position-absolute top-50 start-50 translate-middle text-center mt-2">
+                  <h3 class="mb-0 fw-bold" id="targetValue">-</h3>
+                  <small class="text-success" id="targetChange">-</small>
+                </div>
+              </div>
+              
+              <p class="text-muted small mt-3 px-2">Retention is holding steady. Your targeted goal for the quarter is <strong id="targetGoal">-</strong>.</p>
+              
+              <div class="row mt-3 text-center border-top pt-3">
+                <div class="col-4 border-end">
+                  <div class="fw-bold" id="statTarget">85%</div>
+                  <div class="text-danger" style="font-size:0.7rem;">Target</div>
+                </div>
+                <div class="col-4 border-end">
+                  <div class="fw-bold" id="statCurrent">84.8%</div>
+                  <div class="text-primary" style="font-size:0.7rem;">Current</div>
+                </div>
+                <div class="col-4">
+                  <div class="fw-bold" id="statGap">-0.2%</div>
+                  <div class="text-warning" style="font-size:0.7rem;">Gap</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top Risk Categories -->
+            <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+              <h6 class="mb-0 fw-bold">Highest Risk Departments</h6>
+              <a href="analytics.html" class="text-primary small text-decoration-none">View All</a>
+            </div>
+            
+            <div id="riskDepartmentsList">
+              <!-- Rendered via JS -->
+            </div>
+
+          </div>
+        </div> <!-- End Grid -->
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/mock-data.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set Date Range
+      const today = new Date();
+      const lastMonth = new Date(today);
+      lastMonth.setMonth(today.getMonth() - 1);
+      document.getElementById('dateRange').textContent = `${lastMonth.toLocaleDateString('en-US', {month: 'short', day: '2-digit', year: 'numeric'})} - ${today.toLocaleDateString('en-US', {month: 'short', day: '2-digit', year: 'numeric'})}`;
+
+      // Populate KPIs
+      const kpis = window.MockData.kpis;
+      document.getElementById('kpiTotalEmp').textContent = formatNumber(kpis.totalEmployees);
+      document.getElementById('kpiAttrCount').textContent = kpis.attritionCount;
+      document.getElementById('kpiAttrRate').textContent = kpis.attritionRate + '%';
+      document.getElementById('kpiAvgProb').textContent = kpis.avgProbability + '%';
+
+      // Set Trend Badges
+      const setTrend = (id, val, invert = false) => {
+        const el = document.getElementById(id);
+        el.textContent = (val > 0 ? '↑ ' : '↓ ') + Math.abs(val) + '%';
+        let isGood = val > 0;
+        if (invert) isGood = !isGood; // For attrition, lower is better
+        
+        el.className = `trend-badge ${isGood ? 'trend-up' : 'trend-down'}`;
+      };
+      
+      setTrend('kpiTotalTrend', kpis.totalEmployeesTrend);
+      setTrend('kpiAttrTrend', kpis.attritionTrend, true); // lower attrition count = good
+      setTrend('kpiRateTrend', kpis.attritionRateTrend, true); // lower attrition rate = good
+      
+      // Right Panel Stats
+      const ctxData = window.MockData.contextual;
+      document.getElementById('targetValue').textContent = ctxData.retentionCurrent + '%';
+      document.getElementById('targetChange').textContent = '+0.5% Last Month';
+      document.getElementById('targetGoal').textContent = ctxData.retentionTarget + '%';
+      document.getElementById('statTarget').textContent = ctxData.retentionTarget + '%';
+      document.getElementById('statCurrent').textContent = ctxData.retentionCurrent + '%';
+      
+      // Render Dept Cards
+      const deptList = document.getElementById('riskDepartmentsList');
+      const colors = ['#fee2e2', '#fef3c7', '#d1fae5'];
+      const txtColors = ['#ef4444', '#f59e0b', '#10b981'];
+      
+      ctxData.topRiskDepartments.forEach((dept, idx) => {
+        const card = document.createElement('div');
+        card.className = 'saas-card mb-2 p-3 d-flex align-items-center justify-content-between';
+        card.innerHTML = `
+          <div class="d-flex align-items-center">
+            <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width:40px; height:40px; background-color:${colors[idx%3]}; color:${txtColors[idx%3]}">
+              <i class="bi bi-building"></i>
+            </div>
+            <div>
+              <div class="fw-bold fs-6">${dept.name}</div>
+              <div class="text-muted small">Risk Score: ${dept.riskScore}</div>
+            </div>
+          </div>
+          <div class="trend-badge trend-down bg-light border">${dept.change}</div>
+        `;
+        deptList.appendChild(card);
+      });
+
+      // --- Initialize Charts ---
+      Chart.defaults.font.family = 'Inter';
+      Chart.defaults.color = '#718096';
+      const cData = window.MockData.charts;
+
+      // Trend Chart
+      new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+          labels: cData.attritionTrend.labels,
+          datasets: [{
+            label: 'Attrition',
+            data: cData.attritionTrend.data,
+            borderColor: '#ff6b00',
+            backgroundColor: 'rgba(255, 107, 0, 0.1)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#ff6b00'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+
+      // Risk Doughnut
+      new Chart(document.getElementById('riskChart'), {
+        type: 'doughnut',
+        data: {
+          labels: cData.riskDistribution.labels,
+          datasets: [{
+            data: cData.riskDistribution.data,
+            backgroundColor: cData.riskDistribution.colors,
+            borderWidth: 0,
+            cutout: '75%'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } }
+          }
+        }
+      });
+      
+      // Target Semi-Circle
+      new Chart(document.getElementById('targetChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Current', 'Remaining'],
+          datasets: [{
+            data: [ctxData.retentionCurrent, 100 - ctxData.retentionCurrent],
+            backgroundColor: ['#ff6b00', '#e2e8f0'],
+            borderWidth: 0,
+            cutout: '80%',
+            rotation: 270,
+            circumference: 180,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } }
+        }
+      });
+
+      // Dept Bar Chart
+      new Chart(document.getElementById('deptChart'), {
+        type: 'bar',
+        data: {
+          labels: cData.byDepartment.labels,
+          datasets: [{
+            label: 'Attrition Count',
+            data: cData.byDepartment.data,
+            backgroundColor: '#ff6b00',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+
+      // Role Bar Chart
+      new Chart(document.getElementById('roleChart'), {
+        type: 'bar',
+        data: {
+          labels: cData.byRole.labels,
+          datasets: [{
+            label: 'Attrition Count',
+            data: cData.byRole.data,
+            backgroundColor: '#f59e0b',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

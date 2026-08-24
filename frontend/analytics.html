@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics - AttritionPredict</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">
+        <i class="bi bi-hexagon-fill"></i> AttritionPredict
+      </a>
+      
+      <div class="sidebar-nav">
+        <div class="nav-group-title">Main</div>
+        <a href="dashboard.html" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a>
+        <a href="#" class="nav-link"><i class="bi bi-people"></i> Employees</a>
+        
+        <div class="nav-group-title">Analysis</div>
+        <a href="prediction.html" class="nav-link"><i class="bi bi-magic"></i> Attrition Prediction</a>
+        <a href="analytics.html" class="nav-link active"><i class="bi bi-bar-chart"></i> Analytics</a>
+        
+        <div class="nav-group-title">Reports</div>
+        <a href="high-risk.html" class="nav-link"><i class="bi bi-exclamation-triangle"></i> High-Risk Employees</a>
+        <a href="history.html" class="nav-link"><i class="bi bi-clock-history"></i> Prediction History</a>
+        
+        <div class="nav-group-title">System</div>
+        <a href="#" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-list mobile-toggle" id="mobileToggle"></i>
+          <div class="header-search position-relative">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="form-control" placeholder="Search anything...">
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <button class="icon-btn"><i class="bi bi-sun"></i></button>
+          <button class="icon-btn position-relative">
+            <i class="bi bi-bell"></i>
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+          </button>
+          
+          <div class="user-profile dropdown">
+            <div class="d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="user-info d-none d-sm-flex me-2">
+                <span class="user-name">Robert Brown</span>
+                <span class="user-role">HR Manager</span>
+              </div>
+              <img src="https://i.pravatar.cc/150?u=robert" alt="User" class="user-avatar" style="object-fit: cover;">
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+              <li><a class="dropdown-item" href="#">Profile</a></li>
+              <li><a class="dropdown-item" href="#">Settings</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Page Content -->
+      <div class="page-content-wrapper">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Analytics</h1>
+            <div class="page-subtitle">Detailed breakdown of attrition drivers across the organization.</div>
+          </div>
+        </div>
+        
+        <!-- Filter Bar -->
+        <div class="saas-card py-3 mb-4">
+          <div class="row g-3 align-items-center">
+            <div class="col-md-auto fw-bold text-dark me-2">
+              <i class="bi bi-funnel me-1"></i> Filters
+            </div>
+            <div class="col-md-3">
+              <select class="form-select form-select-sm">
+                <option value="">All Departments</option>
+                <option>Sales</option>
+                <option>Research & Development</option>
+                <option>Human Resources</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select form-select-sm">
+                <option value="">Date Range: YTD</option>
+                <option>Last 30 Days</option>
+                <option>Last Quarter</option>
+                <option>Last Year</option>
+              </select>
+            </div>
+            <div class="col-md-auto ms-auto">
+              <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-download me-1"></i> Export PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-grid no-right-panel">
+          
+          <!-- Analytics Charts Grid -->
+          <div class="row g-4">
+            
+            <div class="col-md-6">
+              <div class="saas-card h-100">
+                <h6 class="card-title-sm text-dark mb-4">Attrition by Department</h6>
+                <div style="height: 250px;"><canvas id="chartDept"></canvas></div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="saas-card h-100">
+                <h6 class="card-title-sm text-dark mb-4">Attrition by Job Role</h6>
+                <div style="height: 250px;"><canvas id="chartRole"></canvas></div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="saas-card h-100">
+                <h6 class="card-title-sm text-dark mb-4">Attrition by Age Group</h6>
+                <div style="height: 250px;"><canvas id="chartAge"></canvas></div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="saas-card h-100">
+                <h6 class="card-title-sm text-dark mb-4">Attrition by Salary Range</h6>
+                <div style="height: 250px;"><canvas id="chartSalary"></canvas></div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="saas-card h-100">
+                <h6 class="card-title-sm text-dark mb-4">Attrition by Overtime</h6>
+                <div style="height: 250px;"><canvas id="chartOvertime"></canvas></div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="saas-card h-100">
+                <h6 class="card-title-sm text-dark mb-4">Attrition by Job Satisfaction</h6>
+                <div style="height: 250px;"><canvas id="chartSatisfaction"></canvas></div>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="saas-card h-100">
+                <h6 class="card-title-sm text-dark mb-4">Years at Company vs Attrition</h6>
+                <div style="height: 300px;"><canvas id="chartYears"></canvas></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/app.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Chart.defaults.font.family = 'Inter';
+      Chart.defaults.color = '#718096';
+      
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+          x: { grid: { display: false } }
+        }
+      };
+
+      // 1. Dept
+      new Chart(document.getElementById('chartDept'), {
+        type: 'bar',
+        data: {
+          labels: ['Sales', 'R&D', 'HR', 'Support'],
+          datasets: [{ data: [65, 80, 15, 14], backgroundColor: '#ff6b00', borderRadius: 4 }]
+        },
+        options: commonOptions
+      });
+
+      // 2. Role
+      new Chart(document.getElementById('chartRole'), {
+        type: 'bar',
+        data: {
+          labels: ['Sales Exec', 'Research Sci', 'Lab Tech', 'Manager', 'HR'],
+          datasets: [{ data: [45, 35, 40, 15, 10], backgroundColor: '#f59e0b', borderRadius: 4 }]
+        },
+        options: commonOptions
+      });
+
+      // 3. Age Group
+      new Chart(document.getElementById('chartAge'), {
+        type: 'bar',
+        data: {
+          labels: ['18-25', '26-35', '36-45', '46-55', '55+'],
+          datasets: [{ data: [45, 80, 30, 20, 9], backgroundColor: '#10b981', borderRadius: 4 }]
+        },
+        options: commonOptions
+      });
+
+      // 4. Salary Range
+      new Chart(document.getElementById('chartSalary'), {
+        type: 'bar',
+        data: {
+          labels: ['< $2.5k', '$2.5k-$5k', '$5k-$10k', '$10k+'],
+          datasets: [{ data: [75, 60, 35, 14], backgroundColor: '#6366f1', borderRadius: 4 }]
+        },
+        options: commonOptions
+      });
+
+      // 5. Overtime (Grouped Bar)
+      new Chart(document.getElementById('chartOvertime'), {
+        type: 'bar',
+        data: {
+          labels: ['Yes', 'No'],
+          datasets: [
+            { label: 'Left', data: [95, 30], backgroundColor: '#ef4444', borderRadius: 4 },
+            { label: 'Stayed', data: [150, 750], backgroundColor: '#e2e8f0', borderRadius: 4 }
+          ]
+        },
+        options: {
+          ...commonOptions,
+          plugins: { legend: { display: true, position: 'top' } }
+        }
+      });
+
+      // 6. Job Satisfaction
+      new Chart(document.getElementById('chartSatisfaction'), {
+        type: 'bar',
+        data: {
+          labels: ['1 (Low)', '2', '3', '4 (High)'],
+          datasets: [{ data: [66, 46, 73, 52], backgroundColor: '#8b5cf6', borderRadius: 4 }]
+        },
+        options: commonOptions
+      });
+
+      // 7. Years at Company (Grouped Bar representation)
+      new Chart(document.getElementById('chartYears'), {
+        type: 'bar',
+        data: {
+          labels: ['0-2 Years', '3-5 Years', '6-10 Years', '11+ Years'],
+          datasets: [
+            { label: 'Attrition', data: [90, 50, 30, 14], backgroundColor: '#ff6b00', borderRadius: 4 }
+          ]
+        },
+        options: commonOptions
+      });
+      
+    });
+  </script>
+</body>
+</html>
