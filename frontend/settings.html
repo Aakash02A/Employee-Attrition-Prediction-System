@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - AttritionPredict</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="sidebar-brand">
+        <i class="bi bi-hexagon-fill"></i> AttritionPredict
+      </a>
+      
+      <div class="sidebar-nav">
+        <div class="nav-group-title">Main</div>
+        <a href="dashboard.html" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a>
+        <a href="employees.html" class="nav-link"><i class="bi bi-people"></i> Employees</a>
+        
+        <div class="nav-group-title">Analysis</div>
+        <a href="prediction.html" class="nav-link"><i class="bi bi-magic"></i> Attrition Prediction</a>
+        <a href="analytics.html" class="nav-link"><i class="bi bi-bar-chart"></i> Analytics</a>
+        
+        <div class="nav-group-title">Reports</div>
+        <a href="high-risk.html" class="nav-link"><i class="bi bi-exclamation-triangle"></i> High-Risk Employees</a>
+        <a href="history.html" class="nav-link"><i class="bi bi-clock-history"></i> Prediction History</a>
+        
+        <div class="nav-group-title">System</div>
+        <a href="settings.html" class="nav-link active"><i class="bi bi-gear"></i> Settings</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-list mobile-toggle" id="mobileToggle"></i>
+          <div class="header-search position-relative">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="form-control" placeholder="Search anything...">
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <button class="icon-btn"><i class="bi bi-sun"></i></button>
+          <button class="icon-btn position-relative">
+            <i class="bi bi-bell"></i>
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+          </button>
+          
+          <div class="user-profile dropdown">
+            <div class="d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="user-info d-none d-sm-flex me-2">
+                <span class="user-name">Robert Brown</span>
+                <span class="user-role">HR Manager</span>
+              </div>
+              <img src="https://i.pravatar.cc/150?u=robert" alt="User" class="user-avatar" style="object-fit: cover;">
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+              <li><a class="dropdown-item" href="#">Profile</a></li>
+              <li><a class="dropdown-item" href="settings.html">Settings</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Page Content -->
+      <div class="page-content-wrapper">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Settings</h1>
+            <div class="page-subtitle">Manage application preferences and machine learning models.</div>
+          </div>
+        </div>
+
+        <div class="content-grid no-right-panel">
+          
+          <div class="row g-4">
+            
+            <div class="col-lg-4">
+              <!-- Navigation Pills for Settings -->
+              <div class="saas-card p-3">
+                <div class="nav flex-column nav-pills" id="settings-tabs" role="tablist" aria-orientation="vertical">
+                  <button class="nav-link active text-start py-3 border-bottom rounded-0" id="profile-tab" data-bs-toggle="pill" data-bs-target="#profile" type="button" role="tab">
+                    <i class="bi bi-person me-2"></i> User Profile
+                  </button>
+                  <button class="nav-link text-start py-3 border-bottom rounded-0" id="model-tab" data-bs-toggle="pill" data-bs-target="#model" type="button" role="tab">
+                    <i class="bi bi-cpu me-2"></i> ML Model Config
+                  </button>
+                  <button class="nav-link text-start py-3 border-bottom rounded-0" id="notifications-tab" data-bs-toggle="pill" data-bs-target="#notifications" type="button" role="tab">
+                    <i class="bi bi-bell me-2"></i> Notifications
+                  </button>
+                  <button class="nav-link text-start py-3 rounded-0" id="security-tab" data-bs-toggle="pill" data-bs-target="#security" type="button" role="tab">
+                    <i class="bi bi-shield-lock me-2"></i> Security
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-lg-8">
+              <div class="tab-content" id="settings-tabContent">
+                
+                <!-- Profile Tab -->
+                <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                  <div class="saas-card">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">User Profile</h5>
+                    <form>
+                      <div class="row g-3">
+                        <div class="col-md-12 mb-3">
+                          <label class="form-label">Profile Image</label>
+                          <div class="d-flex align-items-center">
+                            <img src="https://i.pravatar.cc/150?u=robert" alt="User" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                            <button type="button" class="btn btn-outline-secondary btn-sm me-2">Change Image</button>
+                            <button type="button" class="btn btn-outline-danger btn-sm">Remove</button>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                          <label class="form-label">First Name</label>
+                          <input type="text" class="form-control" value="Robert">
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label">Last Name</label>
+                          <input type="text" class="form-control" value="Brown">
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label">Email Address</label>
+                          <input type="email" class="form-control" value="robert.brown@company.com">
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label">Role</label>
+                          <input type="text" class="form-control" value="HR Manager" disabled>
+                        </div>
+                      </div>
+                      <div class="mt-4 pt-3 border-top text-end">
+                        <button type="button" class="btn btn-primary">Save Changes</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                
+                <!-- Model Config Tab -->
+                <div class="tab-pane fade" id="model" role="tabpanel">
+                  <div class="saas-card">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">Model Configuration</h5>
+                    <div class="alert alert-info small">
+                      <i class="bi bi-info-circle me-1"></i> These settings affect how the Attrition Prediction ML model interprets data.
+                    </div>
+                    <form>
+                      <div class="mb-3">
+                        <label class="form-label d-flex justify-content-between">
+                          <span>Risk Thresholds</span>
+                          <span class="badge bg-primary">v2.1.0 (Active)</span>
+                        </label>
+                        <div class="row g-2 align-items-center">
+                          <div class="col-auto"><span class="badge badge-low">Low</span> <= </div>
+                          <div class="col-2"><input type="number" class="form-control form-control-sm" value="40"></div>
+                          <div class="col-auto">%</div>
+                        </div>
+                        <div class="row g-2 align-items-center mt-2">
+                          <div class="col-auto"><span class="badge badge-med">Medium</span> <= </div>
+                          <div class="col-2"><input type="number" class="form-control form-control-sm" value="70"></div>
+                          <div class="col-auto">%</div>
+                        </div>
+                      </div>
+                      
+                      <div class="mt-4 mb-3">
+                        <label class="form-label">Active Model</label>
+                        <select class="form-select">
+                          <option value="v2.1.0">v2.1.0 (Random Forest - 94% Accuracy)</option>
+                          <option value="v2.0.1">v2.0.1 (Logistic Regression - 89% Accuracy)</option>
+                        </select>
+                      </div>
+                      
+                      <div class="mt-4 pt-3 border-top text-end">
+                        <button type="button" class="btn btn-primary">Update Config</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div class="tab-pane fade" id="notifications" role="tabpanel">
+                  <div class="saas-card">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">Notification Preferences</h5>
+                    
+                    <div class="form-check form-switch mb-3">
+                      <input class="form-check-input" type="checkbox" id="notif1" checked>
+                      <label class="form-check-label" for="notif1">Email me when a High-Risk employee is identified</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                      <input class="form-check-input" type="checkbox" id="notif2" checked>
+                      <label class="form-check-label" for="notif2">Weekly Attrition Summary Report</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                      <input class="form-check-input" type="checkbox" id="notif3">
+                      <label class="form-check-label" for="notif3">Model Retraining Alerts</label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Security Tab -->
+                <div class="tab-pane fade" id="security" role="tabpanel">
+                  <div class="saas-card">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">Security Settings</h5>
+                    <form>
+                      <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" class="form-control">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-control">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control">
+                      </div>
+                      <div class="mt-4 pt-3 border-top text-end">
+                        <button type="button" class="btn btn-primary">Change Password</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

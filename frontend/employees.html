@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prediction History - AttritionPredict</title>
+  <title>Employees - AttritionPredict</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +25,7 @@
       <div class="sidebar-nav">
         <div class="nav-group-title">Main</div>
         <a href="dashboard.html" class="nav-link"><i class="bi bi-grid"></i> Dashboard</a>
-        <a href="employees.html" class="nav-link"><i class="bi bi-people"></i> Employees</a>
+        <a href="employees.html" class="nav-link active"><i class="bi bi-people"></i> Employees</a>
         
         <div class="nav-group-title">Analysis</div>
         <a href="prediction.html" class="nav-link"><i class="bi bi-magic"></i> Attrition Prediction</a>
@@ -33,7 +33,7 @@
         
         <div class="nav-group-title">Reports</div>
         <a href="high-risk.html" class="nav-link"><i class="bi bi-exclamation-triangle"></i> High-Risk Employees</a>
-        <a href="history.html" class="nav-link active"><i class="bi bi-clock-history"></i> Prediction History</a>
+        <a href="history.html" class="nav-link"><i class="bi bi-clock-history"></i> Prediction History</a>
         
         <div class="nav-group-title">System</div>
         <a href="settings.html" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
@@ -81,57 +81,56 @@
       <div class="page-content-wrapper">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Prediction History</h1>
-            <div class="page-subtitle">Log of all historical ML predictions.</div>
+            <h1 class="page-title">Employees Directory</h1>
+            <div class="page-subtitle">Manage and view all employee records.</div>
           </div>
-          <button class="btn btn-outline-secondary"><i class="bi bi-download me-1"></i> Export CSV</button>
+          <button class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Add Employee</button>
         </div>
 
         <!-- Filter Bar -->
         <div class="saas-card py-3 mb-4">
           <div class="row g-3 align-items-center">
-            <div class="col-md-3">
+            <div class="col-md-4">
               <div class="position-relative">
-                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-2 text-muted"></i>
-                <input type="text" class="form-control form-control-sm ps-4" id="searchEmp" placeholder="Search Employee Code...">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <input type="text" class="form-control ps-5" id="searchEmp" placeholder="Search by ID or Role...">
               </div>
             </div>
             <div class="col-md-3">
-              <select class="form-select form-select-sm" id="filterResult">
-                <option value="All">All Predictions</option>
-                <option value="Leave">Leave</option>
-                <option value="Stay">Stay</option>
+              <select class="form-select" id="filterDept">
+                <option value="All">All Departments</option>
+                <option value="Sales">Sales</option>
+                <option value="Research & Development">Research & Development</option>
+                <option value="Human Resources">Human Resources</option>
+                <option value="Support">Support</option>
               </select>
-            </div>
-            <div class="col-md-3">
-              <input type="date" class="form-control form-control-sm" id="filterDate">
             </div>
           </div>
         </div>
 
-        <div class="saas-card p-0 overflow-hidden mb-4">
+        <div class="saas-card p-0 overflow-hidden">
           <div class="table-responsive border-0">
-            <table class="table table-hover mb-0" id="historyTable">
+            <table class="table table-hover mb-0" id="empTable">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Employee Code</th>
-                  <th>Prediction</th>
-                  <th>Probability</th>
-                  <th>Model Version</th>
-                  <th>Requested By</th>
+                  <th>Emp Code</th>
+                  <th>Age</th>
+                  <th>Department</th>
+                  <th>Job Role</th>
+                  <th>Years at Company</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="historyTableBody">
+              <tbody id="empTableBody">
                 <!-- Populated via JS -->
               </tbody>
             </table>
           </div>
         </div>
-        
+
         <!-- Pagination -->
-        <nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center">
-          <div class="text-muted small" id="pageInfo">Showing 1 to 10 of 15 entries</div>
+        <nav aria-label="Page navigation" class="mt-4 d-flex justify-content-between align-items-center">
+          <div class="text-muted small" id="pageInfo">Showing 1 to 10 of 30 entries</div>
           <ul class="pagination pagination-sm mb-0">
             <li class="page-item disabled" id="btnPrev"><a class="page-link" href="#" onclick="changePage(-1)">Previous</a></li>
             <li class="page-item active"><a class="page-link" href="#" id="pageNum">1</a></li>
@@ -149,12 +148,12 @@
   
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const allHistory = window.MockData.history;
-      let currentData = [...allHistory];
+      const allEmployees = window.MockData.employees;
+      let currentData = [...allEmployees];
       
-      const tbody = document.getElementById('historyTableBody');
+      const tbody = document.getElementById('empTableBody');
       const searchEmp = document.getElementById('searchEmp');
-      const filterResult = document.getElementById('filterResult');
+      const filterDept = document.getElementById('filterDept');
       
       // Pagination state
       let currentPage = 1;
@@ -163,7 +162,6 @@
       const renderTable = () => {
         tbody.innerHTML = '';
         
-        // Paging logic
         const total = currentData.length;
         const totalPages = Math.ceil(total / itemsPerPage);
         
@@ -176,7 +174,7 @@
         const pageData = currentData.slice(start, end);
         
         if (pageData.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No history records found.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No employees found.</td></tr>';
           document.getElementById('pageInfo').textContent = 'Showing 0 entries';
           document.getElementById('btnPrev').classList.add('disabled');
           document.getElementById('btnNext').classList.add('disabled');
@@ -189,18 +187,18 @@
         document.getElementById('btnPrev').classList.toggle('disabled', currentPage === 1);
         document.getElementById('btnNext').classList.toggle('disabled', currentPage === totalPages);
         
-        pageData.forEach(item => {
-          const isLeave = item.prediction.includes('Leave');
-          const predClass = isLeave ? 'text-danger fw-bold' : 'text-success fw-bold';
-          
+        pageData.forEach(emp => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${item.date}</td>
-            <td class="fw-bold text-dark">${item.empCode}</td>
-            <td class="${predClass}">${item.prediction}</td>
-            <td>${item.probability}%</td>
-            <td class="text-muted">${item.modelVersion}</td>
-            <td>${item.requestedBy}</td>
+            <td class="fw-bold">${emp.empCode}</td>
+            <td>${emp.age}</td>
+            <td>${emp.department}</td>
+            <td>${emp.jobRole}</td>
+            <td>${emp.yearsAtCompany} Years</td>
+            <td>
+              <button class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </td>
           `;
           tbody.appendChild(tr);
         });
@@ -211,29 +209,30 @@
         renderTable();
       };
       
-      // Filtering logic
       const applyFilters = () => {
         const search = searchEmp.value.toLowerCase();
-        const res = filterResult.value;
+        const dept = filterDept.value;
         
-        let filtered = allHistory;
+        let filtered = allEmployees;
         
         if (search) {
-          filtered = filtered.filter(h => h.empCode.toLowerCase().includes(search));
+          filtered = filtered.filter(e => 
+            e.empCode.toLowerCase().includes(search) || 
+            e.jobRole.toLowerCase().includes(search)
+          );
         }
-        if (res !== 'All') {
-          filtered = filtered.filter(h => h.prediction.includes(res));
+        if (dept !== 'All') {
+          filtered = filtered.filter(e => e.department === dept);
         }
         
         currentData = filtered;
-        currentPage = 1; // Reset to page 1 on filter change
+        currentPage = 1;
         renderTable();
       };
       
       searchEmp.addEventListener('input', applyFilters);
-      filterResult.addEventListener('change', applyFilters);
+      filterDept.addEventListener('change', applyFilters);
       
-      // Initial render
       renderTable();
     });
   </script>
