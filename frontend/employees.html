@@ -65,7 +65,7 @@
             <h1 class="page-title">Employees Directory</h1>
             <div class="page-subtitle">Manage and view all employee records.</div>
           </div>
-          <button class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Add Employee</button>
+          <button class="btn btn-primary" onclick="openAddModal()"><i class="bi bi-plus-lg me-1"></i> Add Employee</button>
         </div>
 
         <!-- Filter Bar -->
@@ -121,6 +121,51 @@
 
       </div>
     </main>
+  </div>
+
+  <!-- Add Employee Modal -->
+  <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Employee</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addEmployeeForm">
+            <div class="mb-3">
+              <label for="addEmpCode" class="form-label">Employee Code</label>
+              <input type="text" class="form-control" id="addEmpCode" placeholder="e.g. EMP123" required>
+            </div>
+            <div class="mb-3">
+              <label for="addAge" class="form-label">Age</label>
+              <input type="number" class="form-control" id="addAge" required>
+            </div>
+            <div class="mb-3">
+              <label for="addDept" class="form-label">Department</label>
+              <select class="form-select" id="addDept" required>
+                <option value="Sales">Sales</option>
+                <option value="Research & Development">Research & Development</option>
+                <option value="Human Resources">Human Resources</option>
+                <option value="Support">Support</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="addRole" class="form-label">Job Role</label>
+              <input type="text" class="form-control" id="addRole" required>
+            </div>
+            <div class="mb-3">
+              <label for="addYears" class="form-label">Years at Company</label>
+              <input type="number" class="form-control" id="addYears" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveNewEmployee()">Add Employee</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Edit Employee Modal -->
@@ -250,6 +295,34 @@
       window.changePage = (dir) => {
         currentPage += dir;
         renderTable();
+      };
+
+      window.openAddModal = () => {
+        document.getElementById('addEmployeeForm').reset();
+        const modal = new bootstrap.Modal(document.getElementById('addEmployeeModal'));
+        modal.show();
+      };
+      
+      window.saveNewEmployee = () => {
+        const empCode = document.getElementById('addEmpCode').value || ('EMP' + Math.floor(Math.random() * 1000));
+        const age = parseInt(document.getElementById('addAge').value) || 30;
+        const department = document.getElementById('addDept').value;
+        const jobRole = document.getElementById('addRole').value || 'New Role';
+        const yearsAtCompany = parseInt(document.getElementById('addYears').value) || 0;
+        
+        allEmployees.unshift({
+          empCode,
+          age,
+          department,
+          jobRole,
+          yearsAtCompany
+        });
+        
+        applyFilters(); // Re-render table
+        
+        const modalEl = document.getElementById('addEmployeeModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
       };
 
       window.openEditModal = (empCode) => {
