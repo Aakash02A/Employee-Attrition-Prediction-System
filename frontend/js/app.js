@@ -3,18 +3,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Load sidebar if container exists
-  const sidebarContainer = document.getElementById('sidebar-container');
-  if (sidebarContainer) {
-    try {
-      const response = await fetch('sidebar.html');
-      if (response.ok) {
-        sidebarContainer.outerHTML = await response.text();
-      }
-    } catch (err) {
-      console.error('Failed to load sidebar:', err);
-    }
-  }
+
 
   // Initialize Sidebar Logic
   initSidebar();
@@ -111,4 +100,5 @@ function initTheme() {
     window.dispatchEvent(new Event('themeChanged'));
   });
 }
+
 
