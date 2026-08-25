@@ -113,9 +113,9 @@
         <nav aria-label="Page navigation" class="mt-4 d-flex justify-content-between align-items-center">
           <div class="text-muted small" id="pageInfo">Showing 1 to 10 of 30 entries</div>
           <ul class="pagination pagination-sm mb-0">
-            <li class="page-item disabled" id="btnPrev"><a class="page-link" href="#" onclick="changePage(-1)">Previous</a></li>
+            <li class="page-item disabled" id="btnPrev"><a class="page-link" href="#" onclick="event.preventDefault(); changePage(-1)">Previous</a></li>
             <li class="page-item active"><a class="page-link" href="#" id="pageNum">1</a></li>
-            <li class="page-item" id="btnNext"><a class="page-link" href="#" onclick="changePage(1)">Next</a></li>
+            <li class="page-item" id="btnNext"><a class="page-link" href="#" onclick="event.preventDefault(); changePage(1)">Next</a></li>
           </ul>
         </nav>
 

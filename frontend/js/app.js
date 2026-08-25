@@ -1,8 +1,8 @@
-﻿/**
+/**
  * Shared App Logic (Shell, Sidebar, Auth)
  */
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
 
 
   // Initialize Sidebar Logic
@@ -31,13 +31,13 @@ function initSidebar() {
   }
 
   // Active Link Highlighting based on current path
-  const currentPath = window.location.pathname;
+  const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
   const navLinks = document.querySelectorAll('.sidebar .nav-link');
   
   navLinks.forEach(link => {
-    // Basic matching
+    // Match by exact filename
     const href = link.getAttribute('href');
-    if (href && href !== '#' && currentPath.includes(href)) {
+    if (href && href !== '#' && href === currentPage) {
       navLinks.forEach(l => l.classList.remove('active'));
       link.classList.add('active');
     }
@@ -86,12 +86,12 @@ function initTheme() {
     
     if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'light');
-    document.documentElement.setAttribute('data-bs-theme', 'light');
+      document.documentElement.setAttribute('data-bs-theme', 'light');
       localStorage.setItem('theme', 'light');
       if(icon) { icon.classList.remove('bi-moon'); icon.classList.add('bi-sun'); }
     } else {
       document.documentElement.setAttribute('data-theme', 'dark');
-    document.documentElement.setAttribute('data-bs-theme', 'dark');
+      document.documentElement.setAttribute('data-bs-theme', 'dark');
       localStorage.setItem('theme', 'dark');
       if(icon) { icon.classList.remove('bi-sun'); icon.classList.add('bi-moon'); }
     }

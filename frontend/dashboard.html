@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -238,7 +238,7 @@
       // Set Trend Badges
       const setTrend = (id, val, invert = false) => {
         const el = document.getElementById(id);
-        el.textContent = (val > 0 ? 'â†‘ ' : 'â†“ ') + Math.abs(val) + '%';
+        el.textContent = (val > 0 ? '↑ ' : '↓ ') + Math.abs(val) + '%';
         let isGood = val > 0;
         if (invert) isGood = !isGood; // For attrition, lower is better
         
@@ -256,6 +256,8 @@
       document.getElementById('targetGoal').textContent = ctxData.retentionTarget + '%';
       document.getElementById('statTarget').textContent = ctxData.retentionTarget + '%';
       document.getElementById('statCurrent').textContent = ctxData.retentionCurrent + '%';
+      const gap = (ctxData.retentionCurrent - ctxData.retentionTarget).toFixed(1);
+      document.getElementById('statGap').textContent = (gap >= 0 ? '+' : '') + gap + '%';
       
       // Render Dept Cards
       const deptList = document.getElementById('riskDepartmentsList');
