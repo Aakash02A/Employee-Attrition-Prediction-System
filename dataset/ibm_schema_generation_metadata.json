@@ -1,0 +1,16 @@
+{
+  "generation_timestamp_utc": "2026-08-25T01:37:31.062825+00:00",
+  "random_seed": 42,
+  "schema_source": "Column structure matches the IBM HR Analytics Employee Attrition & Performance dataset (35 columns). All row values are independently synthesized via a domain-informed probabilistic model \u2014 no rows or values were copied from IBM's dataset.",
+  "total_records": 22000,
+  "train_records": 15400,
+  "validation_records": 3300,
+  "test_records": 3300,
+  "attrition_rate_percent": 19.7,
+  "constant_columns_kept_for_schema_parity": [
+    "EmployeeCount (=1)",
+    "StandardHours (=80)",
+    "Over18 (='Y')"
+  ],
+  "expert_review_status": "Synthetic data generated using domain-informed probabilistic rules and automated validation. NOT expert-verified by an HR professional."
+}
