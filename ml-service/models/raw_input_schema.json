@@ -1,0 +1,213 @@
+{
+  "raw_feature_columns": [
+    "Age",
+    "BusinessTravel",
+    "DailyRate",
+    "Department",
+    "DistanceFromHome",
+    "Education",
+    "EducationField",
+    "EnvironmentSatisfaction",
+    "Gender",
+    "HourlyRate",
+    "JobInvolvement",
+    "JobLevel",
+    "JobRole",
+    "JobSatisfaction",
+    "MaritalStatus",
+    "MonthlyIncome",
+    "MonthlyRate",
+    "NumCompaniesWorked",
+    "OverTime",
+    "PercentSalaryHike",
+    "PerformanceRating",
+    "RelationshipSatisfaction",
+    "StockOptionLevel",
+    "TotalWorkingYears",
+    "TrainingTimesLastYear",
+    "WorkLifeBalance",
+    "YearsAtCompany",
+    "YearsInCurrentRole",
+    "YearsSinceLastPromotion",
+    "YearsWithCurrManager"
+  ],
+  "categorical_columns": [
+    "BusinessTravel",
+    "Department",
+    "EducationField",
+    "Gender",
+    "JobRole",
+    "MaritalStatus",
+    "OverTime"
+  ],
+  "categorical_categories": {
+    "BusinessTravel": [
+      "Non-Travel",
+      "Travel_Frequently",
+      "Travel_Rarely"
+    ],
+    "Department": [
+      "Human Resources",
+      "Research & Development",
+      "Sales"
+    ],
+    "EducationField": [
+      "Human Resources",
+      "Life Sciences",
+      "Marketing",
+      "Medical",
+      "Other",
+      "Technical Degree"
+    ],
+    "Gender": [
+      "Female",
+      "Male"
+    ],
+    "JobRole": [
+      "Healthcare Representative",
+      "Human Resources",
+      "Laboratory Technician",
+      "Manager",
+      "Manufacturing Director",
+      "Research Director",
+      "Research Scientist",
+      "Sales Executive",
+      "Sales Representative"
+    ],
+    "MaritalStatus": [
+      "Divorced",
+      "Married",
+      "Single"
+    ],
+    "OverTime": [
+      "No",
+      "Yes"
+    ]
+  },
+  "numeric_columns": [
+    "Age",
+    "DailyRate",
+    "DistanceFromHome",
+    "Education",
+    "EnvironmentSatisfaction",
+    "HourlyRate",
+    "JobInvolvement",
+    "JobLevel",
+    "JobSatisfaction",
+    "MonthlyIncome",
+    "MonthlyRate",
+    "NumCompaniesWorked",
+    "PercentSalaryHike",
+    "PerformanceRating",
+    "RelationshipSatisfaction",
+    "StockOptionLevel",
+    "TotalWorkingYears",
+    "TrainingTimesLastYear",
+    "WorkLifeBalance",
+    "YearsAtCompany",
+    "YearsInCurrentRole",
+    "YearsSinceLastPromotion",
+    "YearsWithCurrManager"
+  ],
+  "numeric_ranges": {
+    "Age": {
+      "min": 18,
+      "max": 60
+    },
+    "DailyRate": {
+      "min": 102,
+      "max": 1499
+    },
+    "DistanceFromHome": {
+      "min": 1,
+      "max": 29
+    },
+    "Education": {
+      "min": 1,
+      "max": 5
+    },
+    "EnvironmentSatisfaction": {
+      "min": 1,
+      "max": 4
+    },
+    "HourlyRate": {
+      "min": 30,
+      "max": 100
+    },
+    "JobInvolvement": {
+      "min": 1,
+      "max": 4
+    },
+    "JobLevel": {
+      "min": 1,
+      "max": 5
+    },
+    "JobSatisfaction": {
+      "min": 1,
+      "max": 4
+    },
+    "MonthlyIncome": {
+      "min": 1009,
+      "max": 19999
+    },
+    "MonthlyRate": {
+      "min": 2094,
+      "max": 26999
+    },
+    "NumCompaniesWorked": {
+      "min": 0,
+      "max": 9
+    },
+    "PercentSalaryHike": {
+      "min": 11,
+      "max": 25
+    },
+    "PerformanceRating": {
+      "min": 3,
+      "max": 4
+    },
+    "RelationshipSatisfaction": {
+      "min": 1,
+      "max": 4
+    },
+    "StockOptionLevel": {
+      "min": 0,
+      "max": 3
+    },
+    "TotalWorkingYears": {
+      "min": 0,
+      "max": 40
+    },
+    "TrainingTimesLastYear": {
+      "min": 0,
+      "max": 6
+    },
+    "WorkLifeBalance": {
+      "min": 1,
+      "max": 4
+    },
+    "YearsAtCompany": {
+      "min": 0,
+      "max": 40
+    },
+    "YearsInCurrentRole": {
+      "min": 0,
+      "max": 18
+    },
+    "YearsSinceLastPromotion": {
+      "min": 0,
+      "max": 15
+    },
+    "YearsWithCurrManager": {
+      "min": 0,
+      "max": 17
+    }
+  },
+  "dropped_columns": [
+    "EmployeeCount",
+    "StandardHours",
+    "Over18",
+    "EmployeeNumber"
+  ],
+  "target_column": "Attrition"
+}

@@ -1,0 +1,29 @@
+{
+  "model_version": "random_forest_tuned_v2_2026-08-25",
+  "model_type": "Random Forest (tuned)",
+  "trained_at_utc": "2026-08-25T08:28:18.409301",
+  "training_rows": 1176,
+  "test_rows": 294,
+  "decision_threshold": 0.4936,
+  "test_metrics": {
+    "accuracy": 0.8129,
+    "precision": 0.4333,
+    "recall": 0.5532,
+    "f1": 0.486,
+    "roc_auc": 0.7694
+  },
+  "best_hyperparameters": {
+    "clf__n_estimators": 150,
+    "clf__min_samples_split": 5,
+    "clf__min_samples_leaf": 1,
+    "clf__max_features": "log2",
+    "clf__max_depth": 4
+  },
+  "comparison_to_v1_baseline": {
+    "v1_model": "Logistic Regression",
+    "v1_f1": 0.459,
+    "v1_roc_auc": 0.785,
+    "v2_f1": 0.486,
+    "v2_roc_auc": 0.7694
+  }
+}
