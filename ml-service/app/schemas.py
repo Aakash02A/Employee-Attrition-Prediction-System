@@ -99,6 +99,12 @@ class EmployeeFeatures(BaseModel):
 
 
 class PredictionResponse(BaseModel):
+    # protected_namespaces=() silences Pydantic's warning about fields
+    # starting with "model_" (it reserves that prefix for its own internals
+    # by default; our field names are intentional and don't collide with
+    # anything Pydantic actually uses).
+    model_config = {"protected_namespaces": ()}
+
     prediction: Literal["STAY", "LEAVE"]
     probability: float = Field(..., ge=0, le=1, description="Probability of attrition (0-1)")
     risk_level: Literal["LOW", "MEDIUM", "HIGH"]
@@ -107,6 +113,8 @@ class PredictionResponse(BaseModel):
 
 
 class HealthResponse(BaseModel):
+    model_config = {"protected_namespaces": ()}
+
     status: Literal["ok"]
     model_version: str
     model_type: str

@@ -1,8 +1,19 @@
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
-pydantic==2.9.2
-joblib==1.4.2
-pandas>=2.2.3
-numpy>=1.26.4
-scikit-learn>=1.8.0
-xgboost>=2.1.1
+# Version pins use >= with a matching major/compatible upper bound rather than
+# exact ==, so pip can select a prebuilt wheel for whatever Python version is
+# in use (avoids forcing a from-source build, which fails on Windows without
+# Visual Studio Build Tools / a C compiler installed).
+#
+# scikit-learn is pinned closer to 1.8.x deliberately: it's the version the
+# saved model/scaler (.pkl files) were trained with. A newer scikit-learn can
+# usually still load the pickle (you may see an InconsistentVersionWarning —
+# harmless), but if you retrain the model, re-pin this to match your installed
+# version, or better, regenerate requirements.txt from `pip freeze` after training.
+
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30,<1.0
+pydantic>=2.9,<3.0
+joblib>=1.4,<2.0
+pandas>=2.2,<3.0
+numpy>=1.26,<3.0
+scikit-learn>=1.8,<1.9
+xgboost>=2.1,<3.0
