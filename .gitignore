@@ -1,2 +1,36 @@
 backend/database
+# Compiled class file
+*.class
 
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Secrets & Configuration (CRITICAL)
+# Do not commit real passwords!
+application.properties
+application-dev.properties
+*.env
+.env*
+
+# OS specific files
+.DS_Store
+Thumbs.db
