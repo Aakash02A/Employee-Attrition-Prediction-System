@@ -20,6 +20,7 @@ public class Prediction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "prediction_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

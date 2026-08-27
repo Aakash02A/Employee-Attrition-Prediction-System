@@ -22,6 +22,7 @@ public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "employee_id")
     private Long id;
 
     @Column(name = "emp_code", nullable = false, unique = true, length = 20)

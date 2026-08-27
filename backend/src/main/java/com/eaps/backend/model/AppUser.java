@@ -19,15 +19,16 @@ public class AppUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(name = "full_name", nullable = false, length = 150)
     private String username;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "password_hash", nullable = false, length = 255)
     private String password; // bcrypt hash
 
     @Enumerated(EnumType.STRING)

@@ -17,6 +17,7 @@ public class JobRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "job_role_id")
     private Long id;
 
     @Column(nullable = false, unique = true, length = 100)

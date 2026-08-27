@@ -196,3 +196,53 @@ INSERT INTO job_role (name) VALUES
 -- environment — this placeholder is NOT a valid hash.
 INSERT INTO app_user (full_name, email, password_hash, role) VALUES
     ('System Admin', 'admin@company.com', '$2a$10$REPLACE_WITH_REAL_BCRYPT_HASH', 'ADMIN');
+
+
+-- ============================================================
+-- Migration: Add ML-required fields to `employees`
+-- Run this AFTER schema.sql has already been applied.
+-- ============================================================
+-- Phase 6 (FastAPI /predict) requires 30 raw input fields, matching
+-- the IBM HR Attrition dataset's columns. The original employees table
+-- (Phase 3) covered ~20 of them. This migration adds the remaining ones
+-- so `employees` becomes the single source of truth for predictions —
+-- Spring Boot can map a row directly to the ML request body with no
+-- guessing or defaulting required.
+
+USE employee_attrition_db;
+
+ALTER TABLE employees
+    ADD COLUMN daily_rate                 INT UNSIGNED       NOT NULL DEFAULT 800  AFTER monthly_income,
+    ADD COLUMN monthly_rate                INT UNSIGNED       NOT NULL DEFAULT 15000 AFTER daily_rate,
+    ADD COLUMN hourly_rate                 SMALLINT UNSIGNED  NOT NULL DEFAULT 65   AFTER monthly_rate,
+    ADD COLUMN business_travel             ENUM('Non-Travel', 'Travel_Rarely', 'Travel_Frequently')
+                                                                NOT NULL DEFAULT 'Travel_Rarely',
+    ADD COLUMN education                   TINYINT UNSIGNED   NOT NULL DEFAULT 3,   -- 1-5
+    ADD COLUMN education_field             ENUM('Human Resources','Life Sciences','Marketing',
+                                                   'Medical','Other','Technical Degree')
+                                                                NOT NULL DEFAULT 'Life Sciences',
+    ADD COLUMN environment_satisfaction    TINYINT UNSIGNED   NOT NULL DEFAULT 3,   -- 1-4
+    ADD COLUMN job_involvement             TINYINT UNSIGNED   NOT NULL DEFAULT 3,   -- 1-4
+    ADD COLUMN marital_status              ENUM('Single','Married','Divorced')
+                                                                NOT NULL DEFAULT 'Single',
+    ADD COLUMN relationship_satisfaction   TINYINT UNSIGNED   NOT NULL DEFAULT 3,   -- 1-4
+    ADD COLUMN stock_option_level          TINYINT UNSIGNED   NOT NULL DEFAULT 0,   -- 0-3
+    ADD COLUMN years_since_last_promotion  SMALLINT UNSIGNED  NOT NULL DEFAULT 0,
+    ADD COLUMN years_with_curr_manager     SMALLINT UNSIGNED  NOT NULL DEFAULT 0,
+
+    ADD CONSTRAINT chk_education CHECK (education BETWEEN 1 AND 5),
+    ADD CONSTRAINT chk_environment_satisfaction CHECK (environment_satisfaction BETWEEN 1 AND 4),
+    ADD CONSTRAINT chk_job_involvement CHECK (job_involvement BETWEEN 1 AND 4),
+    ADD CONSTRAINT chk_relationship_satisfaction CHECK (relationship_satisfaction BETWEEN 1 AND 4),
+    ADD CONSTRAINT chk_stock_option_level CHECK (stock_option_level BETWEEN 0 AND 3);
+
+-- Note on Department / JobRole values:
+-- The ML model was trained on IBM's category set: Department in
+-- ('Sales', 'Research & Development', 'Human Resources') and 9 specific
+-- JobRole values. The department/job_role lookup tables already seeded
+-- in schema.sql include extra values (IT, Finance, Marketing) that the
+-- model never saw during training. Predictions for employees in those
+-- departments will still work (the encoder falls back to the reference
+-- category), but won't reflect anything the model actually learned for
+-- them — flag this as a known limitation, or restrict new employee
+-- department/job-role dropdowns to the trained category set.
