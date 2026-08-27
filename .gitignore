@@ -34,3 +34,8 @@ application-dev.properties
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
