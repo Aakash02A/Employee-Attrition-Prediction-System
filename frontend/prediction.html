@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -70,114 +70,69 @@
         <div class="content-grid no-right-panel">
           <div class="row g-4">
             
-            <!-- Left Form Area -->
+            <!-- Left: Employee Picker & Predict -->
             <div class="col-lg-7">
               <div class="saas-card">
-                <h5 class="fw-bold mb-4"><i class="bi bi-person-lines-fill text-primary me-2"></i> Employee Details</h5>
-                
-                <form id="predictionForm">
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <label for="age" class="form-label">Age</label>
-                      <input type="number" class="form-control" id="age" min="16" max="80" required>
+                <h5 class="fw-bold mb-4"><i class="bi bi-person-lines-fill text-primary me-2"></i> Select Employee</h5>
+
+                <!-- Error / Empty state alert -->
+                <div id="predictionAlert" class="alert d-none" role="alert"></div>
+
+                <!-- Employee Picker -->
+                <div class="mb-3">
+                  <label for="employeeSearch" class="form-label">Search Employee</label>
+                  <input type="text" class="form-control" id="employeeSearch" placeholder="Type to filter employees..." autocomplete="off">
+                </div>
+
+                <div class="mb-3">
+                  <label for="employeeSelect" class="form-label">Employee</label>
+                  <select class="form-select" id="employeeSelect" required>
+                    <option value="">Loading employees...</option>
+                  </select>
+                </div>
+
+                <!-- Selected employee info card -->
+                <div id="selectedEmployeeInfo" class="border rounded p-3 bg-light mb-3 d-none">
+                  <div class="row g-2">
+                    <div class="col-sm-6">
+                      <div class="text-muted small">Employee Code</div>
+                      <div class="fw-bold" id="infoEmpCode">-</div>
                     </div>
-                    <div class="col-md-6">
-                      <label for="department" class="form-label">Department</label>
-                      <select class="form-select" id="department" required>
-                        <option value="">Select...</option>
-                        <option value="Sales">Sales</option>
-                        <option value="R&D">Research & Development</option>
-                        <option value="HR">Human Resources</option>
-                        <option value="Support">Support</option>
-                      </select>
+                    <div class="col-sm-6">
+                      <div class="text-muted small">Department</div>
+                      <div class="fw-bold" id="infoDepartment">-</div>
                     </div>
-                    <div class="col-md-6">
-                      <label for="jobRole" class="form-label">Job Role</label>
-                      <select class="form-select" id="jobRole" required>
-                        <option value="">Select...</option>
-                        <option value="Sales Executive">Sales Executive</option>
-                        <option value="Research Scientist">Research Scientist</option>
-                        <option value="Laboratory Technician">Laboratory Technician</option>
-                        <option value="Manager">Manager</option>
-                        <option value="HR">Human Resources</option>
-                      </select>
+                    <div class="col-sm-6">
+                      <div class="text-muted small">Job Role</div>
+                      <div class="fw-bold" id="infoJobRole">-</div>
                     </div>
-                    <div class="col-md-6">
-                      <label for="monthlyIncome" class="form-label">Monthly Income ($)</label>
-                      <input type="number" class="form-control" id="monthlyIncome" min="1000" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="yearsAtCompany" class="form-label">Years at Company</label>
-                      <input type="number" class="form-control" id="yearsAtCompany" min="0" required>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="jobLevel" class="form-label">Job Level (1-5)</label>
-                      <select class="form-select" id="jobLevel" required>
-                        <option value="">Select...</option>
-                        <option value="1">1 - Entry</option>
-                        <option value="2">2 - Junior</option>
-                        <option value="3">3 - Mid</option>
-                        <option value="4">4 - Senior</option>
-                        <option value="5">5 - Executive</option>
-                      </select>
-                    </div>
-                    
-                    <div class="col-12 mt-4">
-                      <h6 class="fw-bold mb-3 border-bottom pb-2">Survey Metrics</h6>
-                    </div>
-                    
-                    <div class="col-md-4">
-                      <label for="jobSatisfaction" class="form-label">Job Satisfaction (1-4)</label>
-                      <select class="form-select" id="jobSatisfaction" required>
-                        <option value="">Select...</option>
-                        <option value="1">1 - Low</option>
-                        <option value="2">2 - Medium</option>
-                        <option value="3">3 - High</option>
-                        <option value="4">4 - Very High</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4">
-                      <label for="workLifeBalance" class="form-label">Work-Life Balance (1-4)</label>
-                      <select class="form-select" id="workLifeBalance" required>
-                        <option value="">Select...</option>
-                        <option value="1">1 - Bad</option>
-                        <option value="2">2 - Good</option>
-                        <option value="3">3 - Better</option>
-                        <option value="4">4 - Best</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4">
-                      <label for="overtime" class="form-label">Overtime</label>
-                      <select class="form-select" id="overtime" required>
-                        <option value="">Select...</option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                      </select>
+                    <div class="col-sm-6">
+                      <div class="text-muted small">Job Level</div>
+                      <div class="fw-bold" id="infoJobLevel">-</div>
                     </div>
                   </div>
-                  
-                  <div class="mt-4 pt-3 border-top d-flex justify-content-end">
-                    <button type="button" class="btn btn-outline-secondary me-2" onclick="document.getElementById('predictionForm').reset()">Clear</button>
-                    <button type="submit" class="btn btn-primary" id="predictBtn">
-                      <span id="predictBtnText">Predict Attrition</span>
-                      <span id="predictBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    </button>
-                  </div>
-                </form>
+                </div>
+
+                <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+                  <button type="button" class="btn btn-primary" id="predictBtn" disabled>
+                    <span id="predictBtnText">Predict Attrition</span>
+                    <span id="predictBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                  </button>
+                </div>
               </div>
             </div>
-            
+
             <!-- Right Result Area -->
             <div class="col-lg-5">
               <div class="saas-card h-100 d-flex flex-column" style="min-height: 400px;">
                 <h5 class="fw-bold mb-4"><i class="bi bi-cpu text-primary me-2"></i> Prediction Result</h5>
-                
+
                 <!-- Initial State -->
                 <div id="resultInitial" class="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-center text-muted p-4">
                   <i class="bi bi-clipboard-data" style="font-size: 3rem; color: var(--border-color);"></i>
-                  <p class="mt-3">Fill out the employee details and click "Predict Attrition" to see the ML model's assessment.</p>
+                  <p class="mt-3">Select an employee and click "Predict Attrition" to see the ML model's assessment.</p>
                 </div>
-                
+
                 <!-- Result State (Hidden by default) -->
                 <div id="resultCard" class="flex-grow-1 d-none">
                   <div class="text-center mb-4">
@@ -187,24 +142,28 @@
                     <h1 class="display-4 fw-bold mb-0 text-dark" id="probValue">-</h1>
                     <p class="text-muted">Probability of Leaving</p>
                   </div>
-                  
+
                   <div class="border rounded p-3 bg-light mb-4">
                     <h6 class="fw-bold text-dark mb-2">Model Recommendation</h6>
                     <p class="mb-0 small" id="recommendationText">-</p>
                   </div>
-                  
+
                   <div class="row g-2 text-center border-top pt-3 mt-auto">
-                    <div class="col-6 border-end">
+                    <div class="col-4 border-end">
                       <div class="text-muted small">Prediction</div>
                       <div class="fw-bold text-dark fs-5" id="predLabel">-</div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4 border-end">
                       <div class="text-muted small">Model Version</div>
-                      <div class="fw-bold text-dark fs-5">v2.1.0</div>
+                      <div class="fw-bold text-dark fs-5" id="modelVersion">-</div>
+                    </div>
+                    <div class="col-4">
+                      <div class="text-muted small">Predicted On</div>
+                      <div class="fw-bold text-dark fs-6" id="predDate">-</div>
                     </div>
                   </div>
                 </div>
-                
+
               </div>
             </div>
 
@@ -216,84 +175,190 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/app.js"></script>
-  
+
   <script>
-    document.getElementById('predictionForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const btnText = document.getElementById('predictBtnText');
-      const btnSpinner = document.getElementById('predictBtnSpinner');
-      const predictBtn = document.getElementById('predictBtn');
-      const resultInitial = document.getElementById('resultInitial');
-      const resultCard = document.getElementById('resultCard');
-      
-      // UI Loading state
-      predictBtn.disabled = true;
-      btnText.textContent = 'Analyzing...';
-      btnSpinner.classList.remove('d-none');
-      
-      // Values for rudimentary mock logic
-      const satisfaction = parseInt(document.getElementById('jobSatisfaction').value);
-      const overtime = document.getElementById('overtime').value;
-      const years = parseInt(document.getElementById('yearsAtCompany').value);
-      
-      // Stub fakePredict()
-      setTimeout(() => {
-        // Mock logic to make the result semi-responsive to inputs
-        let prob = 30; // base
-        if (satisfaction <= 2) prob += 25;
-        if (overtime === 'Yes') prob += 15;
-        if (years < 2) prob += 10;
-        
-        // Add random variance
-        prob += Math.floor(Math.random() * 15) - 7;
-        prob = Math.max(5, Math.min(95, prob)); // clamp
-        
-        let riskClass, badgeClass, recText, predLabel;
-        
-        if (prob <= 40) {
-          riskClass = 'badge-low';
-          badgeClass = 'Low Risk';
-          predLabel = 'Stay';
-          recText = 'Employee shows strong retention indicators. Continue standard engagement practices.';
-        } else if (prob <= 70) {
-          riskClass = 'badge-med';
-          badgeClass = 'Medium Risk';
-          predLabel = 'Stay (At Risk)';
-          recText = 'Consider a check-in meeting to discuss career progression and current satisfaction levels.';
-        } else {
-          riskClass = 'badge-high';
-          badgeClass = 'High Risk';
-          predLabel = 'Leave';
-          recText = 'Immediate intervention recommended. Review compensation, work-life balance, and consider retention incentives.';
+    // ── Auth guard ────────────────────────────────────────────
+    Auth.requireLogin();
+
+    // ── State ────────────────────────────────────────────────
+    let employees = [];          // cached list from API
+    let selectedEmployee = null; // currently-selected employee object
+
+    // ── DOM refs ─────────────────────────────────────────────
+    const employeeSearch  = document.getElementById('employeeSearch');
+    const employeeSelect  = document.getElementById('employeeSelect');
+    const predictBtn      = document.getElementById('predictBtn');
+    const predictBtnText  = document.getElementById('predictBtnText');
+    const predictBtnSpinner = document.getElementById('predictBtnSpinner');
+    const resultInitial   = document.getElementById('resultInitial');
+    const resultCard      = document.getElementById('resultCard');
+    const predAlert       = document.getElementById('predictionAlert');
+    const empInfoCard     = document.getElementById('selectedEmployeeInfo');
+
+    // ── Load employees on page load ──────────────────────────
+    (async function loadEmployees() {
+      try {
+        employees = await Api.getEmployees();
+
+        if (!employees || employees.length === 0) {
+          showAlert('info',
+            '<i class="bi bi-info-circle me-2"></i>No employees found in the database. ' +
+            'Please add employees first via the <strong>Employees</strong> page before running predictions.');
+          employeeSelect.innerHTML = '<option value="">No employees available</option>';
+          return;
         }
-        
-        // Update DOM
-        const riskBadge = document.getElementById('riskBadge');
-        riskBadge.className = `d-inline-block px-3 py-1 rounded-pill fw-bold mb-3 ${riskClass}`;
-        riskBadge.textContent = badgeClass;
-        
-        document.getElementById('probValue').textContent = `${prob}%`;
-        document.getElementById('predLabel').textContent = predLabel;
-        document.getElementById('recommendationText').textContent = recText;
-        
-        // Toggle views
-        resultInitial.classList.add('d-none');
-        resultCard.classList.remove('d-none');
-        resultCard.classList.add('d-flex', 'flex-column');
-        
-        // Reset button
-        predictBtn.disabled = false;
-        btnText.textContent = 'Predict Attrition';
-        btnSpinner.classList.add('d-none');
-        
-      }, 800);
+
+        populateDropdown(employees);
+      } catch (err) {
+        showAlert('danger',
+          '<i class="bi bi-exclamation-triangle me-2"></i>Failed to load employees: ' + escapeHtml(err.message));
+        employeeSelect.innerHTML = '<option value="">Error loading employees</option>';
+      }
+    })();
+
+    /** Populate the <select> from the given employee list. */
+    function populateDropdown(list) {
+      employeeSelect.innerHTML = '<option value="">Select an employee...</option>';
+      list.forEach(emp => {
+        const opt = document.createElement('option');
+        opt.value = emp.id;
+        opt.textContent = `${emp.empCode} — ${emp.department} (${emp.jobRole})`;
+        employeeSelect.appendChild(opt);
+      });
+    }
+
+    // ── Type-ahead search filter ─────────────────────────────
+    employeeSearch.addEventListener('input', () => {
+      const q = employeeSearch.value.toLowerCase().trim();
+      if (!q) {
+        populateDropdown(employees);
+        return;
+      }
+      const filtered = employees.filter(emp =>
+        emp.empCode.toLowerCase().includes(q) ||
+        (emp.department || '').toLowerCase().includes(q) ||
+        (emp.jobRole || '').toLowerCase().includes(q)
+      );
+      populateDropdown(filtered);
     });
+
+    // ── Employee selection handler ───────────────────────────
+    employeeSelect.addEventListener('change', () => {
+      const id = parseInt(employeeSelect.value, 10);
+      selectedEmployee = employees.find(e => e.id === id) || null;
+
+      if (selectedEmployee) {
+        predictBtn.disabled = false;
+        empInfoCard.classList.remove('d-none');
+        document.getElementById('infoEmpCode').textContent    = selectedEmployee.empCode || '-';
+        document.getElementById('infoDepartment').textContent  = selectedEmployee.department || '-';
+        document.getElementById('infoJobRole').textContent     = selectedEmployee.jobRole || '-';
+        document.getElementById('infoJobLevel').textContent    = selectedEmployee.jobLevel || '-';
+      } else {
+        predictBtn.disabled = true;
+        empInfoCard.classList.add('d-none');
+      }
+
+      // Hide any stale error
+      hideAlert();
+    });
+
+    // ── Predict button ───────────────────────────────────────
+    predictBtn.addEventListener('click', () => {
+      if (!selectedEmployee) return;
+      runPrediction(selectedEmployee.id);
+    });
+
+    async function runPrediction(employeeId) {
+      // Loading state
+      predictBtn.disabled = true;
+      predictBtnText.textContent = 'Analyzing...';
+      predictBtnSpinner.classList.remove('d-none');
+      hideAlert();
+
+      try {
+        const result = await Api.predict(employeeId);
+        renderResultCard(result);
+      } catch (err) {
+        showAlert('danger',
+          '<i class="bi bi-exclamation-triangle me-2"></i>' + escapeHtml(err.message));
+      } finally {
+        // Reset button state
+        predictBtn.disabled = !selectedEmployee;
+        predictBtnText.textContent = 'Predict Attrition';
+        predictBtnSpinner.classList.add('d-none');
+      }
+    }
+
+    // ── Render the result card ───────────────────────────────
+    function renderResultCard(result) {
+      // Map riskLevel to CSS badge class
+      const riskMap = {
+        'LOW':    { cls: 'badge-low',  label: 'Low Risk' },
+        'MEDIUM': { cls: 'badge-med',  label: 'Medium Risk' },
+        'HIGH':   { cls: 'badge-high', label: 'High Risk' },
+      };
+      const risk = riskMap[result.riskLevel] || riskMap['MEDIUM'];
+
+      // Risk badge
+      const riskBadge = document.getElementById('riskBadge');
+      riskBadge.className = `d-inline-block px-3 py-1 rounded-pill fw-bold mb-3 ${risk.cls}`;
+      riskBadge.textContent = risk.label;
+
+      // Probability (decimal 0–1 → percentage)
+      const pct = Math.round(result.probability * 100);
+      document.getElementById('probValue').textContent = `${pct}%`;
+
+      // Prediction label (STAY → Stay, LEAVE → Leave)
+      const predText = result.prediction === 'LEAVE' ? 'Leave' : 'Stay';
+      document.getElementById('predLabel').textContent = predText;
+
+      // Model version
+      document.getElementById('modelVersion').textContent = result.modelVersion || '-';
+
+      // Prediction date
+      if (result.createdAt) {
+        const d = new Date(result.createdAt);
+        document.getElementById('predDate').textContent = d.toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric'
+        });
+      } else {
+        document.getElementById('predDate').textContent = '-';
+      }
+
+      // Generate a recommendation based on risk level (backend doesn't return one)
+      const recommendations = {
+        'LOW': 'Employee shows strong retention indicators. Continue standard engagement practices and regular check-ins.',
+        'MEDIUM': 'Consider a check-in meeting to discuss career progression, satisfaction levels, and address any early warning signs.',
+        'HIGH': 'Immediate intervention recommended. Review compensation, work-life balance, and consider retention incentives urgently.',
+      };
+      document.getElementById('recommendationText').textContent =
+        recommendations[result.riskLevel] || 'No recommendation available.';
+
+      // Toggle visibility
+      resultInitial.classList.add('d-none');
+      resultCard.classList.remove('d-none');
+      resultCard.classList.add('d-flex', 'flex-column');
+    }
+
+    // ── Alert helpers ────────────────────────────────────────
+    function showAlert(type, html) {
+      predAlert.className = `alert alert-${type}`;
+      predAlert.innerHTML = html;
+      predAlert.classList.remove('d-none');
+    }
+
+    function hideAlert() {
+      predAlert.classList.add('d-none');
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
   </script>
 </body>
 </html>
-
-
-
-
