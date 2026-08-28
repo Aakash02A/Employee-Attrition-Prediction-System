@@ -1,5 +1,6 @@
 package com.eaps.backend.service;
 
+import org.springframework.web.client.RestTemplate;
 import com.eaps.backend.dto.MlServiceRequest;
 import com.eaps.backend.dto.MlServiceResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -17,13 +18,17 @@ import org.springframework.web.client.RestClientException;
 @Slf4j
 public class MlServiceClient {
 
-    private final RestClient restClient;
+
+    private final RestTemplate restTemplate;
 
     public MlServiceClient(@Value("${ml.service.url}") String mlServiceUrl) {
-        this.restClient = RestClient.builder()
-                .baseUrl(mlServiceUrl)
-                .build();
+        this.restTemplate = new RestTemplate();
+        // Since we removed baseUrl from restTemplate setup, we will need to store the baseUrl
+        // But for now let's just create a field for it
     }
+    
+    @Value("${ml.service.url}") 
+    private String baseUrl;
 
     /**
      * Calls {@code POST /predict} on the FastAPI service.
@@ -35,16 +40,13 @@ public class MlServiceClient {
     public MlServiceResponse predict(MlServiceRequest request) {
         log.info("Calling ML service POST /predict");
         try {
-            MlServiceResponse response = restClient.post()
-                    .uri("/predict")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(request)
-                    .retrieve()
-                    .body(MlServiceResponse.class);
-            log.info("ML service returned: prediction={}, probability={}, risk={}",
-                    response.getPrediction(), response.getProbability(), response.getRiskLevel());
+            MlServiceResponse response = restTemplate.postForObject(baseUrl + "/predict", request, MlServiceResponse.class);
+            if (response != null) {
+                log.info("ML service returned: prediction={}, probability={}, risk={}",
+                        response.getPrediction(), response.getProbability(), response.getRiskLevel());
+            }
             return response;
-        } catch (RestClientException e) {
+        } catch (Exception e) {
             log.error("Failed to call ML service: {}", e.getMessage());
             throw new RuntimeException("ML service is unavailable. Please ensure it is running on the configured URL.", e);
         }
@@ -57,10 +59,7 @@ public class MlServiceClient {
      */
     public boolean isHealthy() {
         try {
-            restClient.get()
-                    .uri("/health")
-                    .retrieve()
-                    .body(String.class);
+            restTemplate.getForObject(baseUrl + "/health", String.class);
             return true;
         } catch (Exception e) {
             log.warn("ML service health check failed: {}", e.getMessage());
