@@ -559,6 +559,42 @@
       document.getElementById('modalAlert').classList.add('d-none');
       document.getElementById('employeeForm').reset();
 
+      // Populate default baseline values
+      document.getElementById('f_age').value = 30;
+      document.getElementById('f_gender').value = 'Male';
+      document.getElementById('f_maritalStatus').value = 'Single';
+      document.getElementById('f_distanceFromHome').value = 5;
+      document.getElementById('f_education').value = 3;
+      document.getElementById('f_educationField').value = 'Life Sciences';
+
+      document.getElementById('f_department').value = 'Research & Development';
+      document.getElementById('f_jobRole').value = 'Research Scientist';
+      document.getElementById('f_jobLevel').value = 2;
+      document.getElementById('f_businessTravel').value = 'Travel_Rarely';
+      document.getElementById('f_overTime').value = 'No';
+      document.getElementById('f_jobInvolvement').value = 3;
+      document.getElementById('f_jobSatisfaction').value = 3;
+
+      document.getElementById('f_monthlyIncome').value = 5000;
+      document.getElementById('f_dailyRate').value = 800;
+      document.getElementById('f_hourlyRate').value = 65;
+      document.getElementById('f_monthlyRate').value = 14000;
+      document.getElementById('f_percentSalaryHike').value = 14;
+      document.getElementById('f_stockOptionLevel').value = 1;
+
+      document.getElementById('f_performanceRating').value = 3;
+      document.getElementById('f_environmentSatisfaction').value = 3;
+      document.getElementById('f_relationshipSatisfaction').value = 3;
+      document.getElementById('f_workLifeBalance').value = 3;
+
+      document.getElementById('f_totalWorkingYears').value = 8;
+      document.getElementById('f_numCompaniesWorked').value = 2;
+      document.getElementById('f_trainingTimesLastYear').value = 3;
+      document.getElementById('f_yearsAtCompany').value = 5;
+      document.getElementById('f_yearsInCurrentRole').value = 3;
+      document.getElementById('f_yearsSinceLastPromotion').value = 1;
+      document.getElementById('f_yearsWithCurrManager').value = 3;
+
       // Reset to first tab
       const firstTab = new bootstrap.Tab(document.getElementById('tab-personal-btn'));
       firstTab.show();

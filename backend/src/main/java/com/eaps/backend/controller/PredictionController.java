@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class PredictionController {
      * Calls the FastAPI ML service and persists the result.
      */
     @PostMapping("/predict")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<PredictionResponse> predict(@Valid @RequestBody PredictionRequest request) {
         // TODO Phase 8: extract username from JWT SecurityContext
         String requestedBy = "admin";
