@@ -129,6 +129,29 @@ const Api = (() => {
     return _fetch(`/employees/${id}`);
   }
 
+  /** POST /api/employees → EmployeeResponse */
+  function createEmployee(employeeData) {
+    return _fetch('/employees', {
+      method: 'POST',
+      body: JSON.stringify(employeeData),
+    });
+  }
+
+  /** PUT /api/employees/:id → EmployeeResponse */
+  function updateEmployee(id, employeeData) {
+    return _fetch(`/employees/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(employeeData),
+    });
+  }
+
+  /** DELETE /api/employees/:id */
+  function deleteEmployee(id) {
+    return _fetch(`/employees/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   // ── Predictions ───────────────────────────────────────────
 
   /**
@@ -159,12 +182,71 @@ const Api = (() => {
     return _fetch('/predictions/high-risk');
   }
 
+  // ── Analytics ─────────────────────────────────────────────
+
+  /** GET /api/analytics/dashboard → DashboardKpiResponse */
+  function getDashboardKpis() {
+    return _fetch('/analytics/dashboard');
+  }
+
+  /** GET /api/analytics/by-department → AnalyticsResponse */
+  function getAttritionByDepartment() {
+    return _fetch('/analytics/by-department');
+  }
+
+  /** GET /api/analytics/by-role → AnalyticsResponse */
+  function getAttritionByJobRole() {
+    return _fetch('/analytics/by-role');
+  }
+
+  /** GET /api/analytics/by-age → AnalyticsResponse */
+  function getAttritionByAgeGroup() {
+    return _fetch('/analytics/by-age');
+  }
+
+  /** GET /api/analytics/by-salary → AnalyticsResponse */
+  function getAttritionBySalaryRange() {
+    return _fetch('/analytics/by-salary');
+  }
+
+  /** GET /api/analytics/by-overtime → AnalyticsResponse */
+  function getAttritionByOvertime() {
+    return _fetch('/analytics/by-overtime');
+  }
+
+  /** GET /api/analytics/by-satisfaction → AnalyticsResponse */
+  function getAttritionByJobSatisfaction() {
+    return _fetch('/analytics/by-satisfaction');
+  }
+
+  /** GET /api/analytics/by-years → AnalyticsResponse */
+  function getAttritionByYearsAtCompany() {
+    return _fetch('/analytics/by-years');
+  }
+
+  /** GET /api/health → Health check status */
+  function getHealth() {
+    return _fetch('/health');
+  }
+
   return {
     getEmployees,
     getEmployee,
+    createEmployee,
+    updateEmployee,
+    deleteEmployee,
     predict,
     getEmployeePredictions,
     getPredictions,
     getHighRiskPredictions,
+    getDashboardKpis,
+    getAttritionByDepartment,
+    getAttritionByJobRole,
+    getAttritionByAgeGroup,
+    getAttritionBySalaryRange,
+    getAttritionByOvertime,
+    getAttritionByJobSatisfaction,
+    getAttritionByYearsAtCompany,
+    getHealth,
   };
 })();

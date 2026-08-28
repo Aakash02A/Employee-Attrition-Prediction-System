@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -12,7 +12,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="css/styles.css">
-<script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');document.documentElement.setAttribute('data-bs-theme', 'dark');}</script>
+  <script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');document.documentElement.setAttribute('data-bs-theme', 'dark');}</script>
 </head>
 <body>
 
@@ -43,13 +43,12 @@
           <div class="user-profile dropdown">
             <div class="d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
               <div class="user-info d-none d-sm-flex me-2">
-                <span class="user-name">Robert Brown</span>
+                <span class="user-name">Admin</span>
                 <span class="user-role">HR Manager</span>
               </div>
-              <img src="https://i.pravatar.cc/150?u=robert" alt="User" class="user-avatar" style="object-fit: cover;">
+              <img src="https://i.pravatar.cc/150?u=admin" alt="User" class="user-avatar" style="object-fit: cover;">
             </div>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-              <li><a class="dropdown-item" href="#">Profile</a></li>
               <li><a class="dropdown-item" href="settings.html">Settings</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Logout</a></li>
@@ -63,10 +62,13 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">High-Risk Employees</h1>
-            <div class="page-subtitle">List of employees with >70% attrition probability.</div>
+            <div class="page-subtitle">List of employees flagged with High or Medium attrition risk by the ML model.</div>
           </div>
-          <button class="btn btn-outline-secondary"><i class="bi bi-download me-1"></i> Export List</button>
+          <button class="btn btn-outline-secondary" onclick="exportTableToCSV()"><i class="bi bi-download me-1"></i> Export List</button>
         </div>
+
+        <!-- Notification Alert -->
+        <div id="pageAlert" class="alert d-none mb-3" role="alert"></div>
 
         <!-- Filter Bar -->
         <div class="saas-card py-3 mb-4">
@@ -77,18 +79,20 @@
             <div class="col-md-3">
               <select class="form-select form-select-sm" id="filterDept">
                 <option value="All">All Departments</option>
-                <option value="Sales">Sales</option>
                 <option value="Research & Development">Research & Development</option>
+                <option value="Sales">Sales</option>
                 <option value="Human Resources">Human Resources</option>
-                <option value="Support">Support</option>
               </select>
             </div>
             <div class="col-md-3">
               <select class="form-select form-select-sm" id="filterRisk">
-                <option value="All">All Risk Levels</option>
-                <option value="High">High Risk (>70%)</option>
-                <option value="Medium">Medium Risk (40-70%)</option>
+                <option value="All">All Risk Levels (High & Medium)</option>
+                <option value="HIGH">High Risk Only (>60%)</option>
+                <option value="MEDIUM">Medium Risk (30-60%)</option>
               </select>
+            </div>
+            <div class="col-md-auto ms-auto">
+              <button class="btn btn-outline-secondary btn-sm" onclick="loadHighRisk()"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
             </div>
           </div>
         </div>
@@ -98,16 +102,21 @@
             <table class="table table-hover mb-0" id="riskTable">
               <thead>
                 <tr>
-                  <th onclick="sortTable(0)">Emp Code <i class="bi bi-arrow-down-up float-end"></i></th>
-                  <th onclick="sortTable(1)">Department <i class="bi bi-arrow-down-up float-end"></i></th>
-                  <th onclick="sortTable(2)">Job Role <i class="bi bi-arrow-down-up float-end"></i></th>
-                  <th onclick="sortTable(3)">Risk Level <i class="bi bi-arrow-down-up float-end"></i></th>
-                  <th onclick="sortTable(4, true)">Probability <i class="bi bi-arrow-down-up float-end"></i></th>
+                  <th onclick="sortTable('empCode')">Emp Code <i class="bi bi-arrow-down-up float-end"></i></th>
+                  <th onclick="sortTable('employeeDepartment')">Department <i class="bi bi-arrow-down-up float-end"></i></th>
+                  <th onclick="sortTable('employeeJobRole')">Job Role <i class="bi bi-arrow-down-up float-end"></i></th>
+                  <th onclick="sortTable('riskLevel')">Risk Level <i class="bi bi-arrow-down-up float-end"></i></th>
+                  <th onclick="sortTable('probability', true)">Probability <i class="bi bi-arrow-down-up float-end"></i></th>
+                  <th onclick="sortTable('createdAt')">Predicted On <i class="bi bi-arrow-down-up float-end"></i></th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody id="riskTableBody">
-                <!-- Populated via JS -->
+                <tr>
+                  <td colspan="7" class="text-center py-5 text-muted">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span> Loading high-risk predictions...
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -126,14 +135,17 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+          <div id="modalHistoryAlert" class="alert d-none" role="alert"></div>
           <div class="table-responsive">
-            <table class="table table-sm">
+            <table class="table table-sm table-hover align-middle">
               <thead class="bg-light">
                 <tr>
                   <th>Date</th>
                   <th>Prediction</th>
                   <th>Probability</th>
+                  <th>Risk Level</th>
                   <th>Model Version</th>
+                  <th>Requested By</th>
                 </tr>
               </thead>
               <tbody id="modalHistoryBody">
@@ -150,142 +162,223 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/app.js"></script>
   
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const allEmployees = window.MockData.employees;
+    Auth.requireLogin();
+
+    let allRiskData = [];
+    let currentData = [];
+    let sortAsc = true;
+    let currentSortKey = '';
+
+    const tbody = document.getElementById('riskTableBody');
+    const filterDept = document.getElementById('filterDept');
+    const filterRisk = document.getElementById('filterRisk');
+
+    async function loadHighRisk() {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span> Loading risk data...
+          </td>
+        </tr>`;
+
+      try {
+        // Fetch all predictions to get the most up-to-date prediction for each employee
+        const predictions = await Api.getPredictions();
+        
+        // Group by employee and keep the latest prediction
+        const latestByEmp = new Map();
+        predictions.forEach(p => {
+          if (!latestByEmp.has(p.employeeId)) {
+            latestByEmp.set(p.employeeId, p);
+          }
+        });
+
+        // Filter for HIGH or MEDIUM risk
+        allRiskData = Array.from(latestByEmp.values()).filter(p => p.riskLevel === 'HIGH' || p.riskLevel === 'MEDIUM');
+
+        applyFilters();
+      } catch (err) {
+        showPageAlert('danger', 'Failed to load high-risk predictions: ' + escapeHtml(err.message));
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Error: ${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    function renderTable(data) {
+      tbody.innerHTML = '';
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted"><i class="bi bi-check-circle text-success fs-3 d-block mb-2"></i>No high-risk employees identified. All predictions are within acceptable thresholds.</td></tr>';
+        return;
+      }
       
-      // Filter for only high/med risk for this specific view initially
-      let currentData = allEmployees.filter(e => e.riskLevel === 'High' || e.riskLevel === 'Medium');
+      data.forEach(item => {
+        const isHigh = item.riskLevel === 'HIGH';
+        const badgeClass = isHigh ? 'badge-high' : 'badge-med';
+        const riskLabel = isHigh ? 'High Risk' : 'Medium Risk';
+        const pct = Math.round((item.probability || 0) * 100);
+        const barColor = isHigh ? 'bg-danger' : 'bg-warning';
+        
+        let dateStr = '-';
+        if (item.createdAt) {
+          const d = new Date(item.createdAt);
+          dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="fw-bold text-dark">${escapeHtml(item.empCode || '#' + item.employeeId)}</td>
+          <td>${escapeHtml(item.employeeDepartment || '-')}</td>
+          <td>${escapeHtml(item.employeeJobRole || '-')}</td>
+          <td><span class="d-inline-block px-2 py-1 rounded fw-bold ${badgeClass}" style="font-size:0.75rem;">${riskLabel}</span></td>
+          <td>
+            <div class="d-flex align-items-center" style="min-width: 140px;">
+              <span class="me-2 fw-bold" style="width: 38px;">${pct}%</span>
+              <div class="progress flex-grow-1" style="height: 6px;">
+                <div class="progress-bar ${barColor}" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          </td>
+          <td>${dateStr}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" onclick="viewHistory(${item.employeeId}, '${escapeHtml(item.empCode || '#' + item.employeeId)}')">
+              <i class="bi bi-clock-history me-1"></i> View
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function applyFilters() {
+      const d = filterDept.value;
+      const r = filterRisk.value;
       
-      const tbody = document.getElementById('riskTableBody');
-      const filterDept = document.getElementById('filterDept');
-      const filterRisk = document.getElementById('filterRisk');
+      let filtered = [...allRiskData];
       
-      const renderTable = (data) => {
-        tbody.innerHTML = '';
-        if (data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No employees match the filters.</td></tr>';
+      if (d !== 'All') {
+        filtered = filtered.filter(e => e.employeeDepartment === d);
+      }
+      if (r !== 'All') {
+        filtered = filtered.filter(e => e.riskLevel === r);
+      }
+      
+      currentData = filtered;
+      renderTable(currentData);
+    }
+
+    filterDept.addEventListener('change', applyFilters);
+    filterRisk.addEventListener('change', applyFilters);
+
+    // ── View Employee History Modal ──────────────────────────
+    async function viewHistory(employeeId, empCode) {
+      document.getElementById('modalEmpCode').textContent = empCode;
+      const hBody = document.getElementById('modalHistoryBody');
+      const alertBox = document.getElementById('modalHistoryAlert');
+      alertBox.classList.add('d-none');
+      
+      hBody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted"><span class="spinner-border spinner-border-sm me-2"></span> Loading history...</td></tr>';
+      
+      const modal = new bootstrap.Modal(document.getElementById('historyModal'));
+      modal.show();
+
+      try {
+        const historyData = await Api.getEmployeePredictions(employeeId);
+        
+        if (!historyData || historyData.length === 0) {
+          hBody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted">No prediction history found for this employee.</td></tr>';
           return;
         }
-        
-        data.forEach(emp => {
-          let badgeClass = '';
-          if (emp.riskLevel === 'High') badgeClass = 'badge-high';
-          if (emp.riskLevel === 'Medium') badgeClass = 'badge-med';
-          if (emp.riskLevel === 'Low') badgeClass = 'badge-low';
+
+        hBody.innerHTML = historyData.map(h => {
+          const isLeave = h.prediction === 'LEAVE';
+          const predClass = isLeave ? 'text-danger fw-bold' : 'text-success fw-bold';
+          const pct = Math.round((h.probability || 0) * 100);
+          const badgeCls = h.riskLevel === 'HIGH' ? 'badge-high' : (h.riskLevel === 'MEDIUM' ? 'badge-med' : 'badge-low');
           
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="fw-bold">${emp.empCode}</td>
-            <td>${emp.department}</td>
-            <td>${emp.jobRole}</td>
-            <td><span class="d-inline-block px-2 py-1 rounded fw-bold ${badgeClass}" style="font-size:0.75rem;">${emp.riskLevel}</span></td>
-            <td><div class="d-flex align-items-center">
-                  <span class="me-2 fw-bold">${emp.probability}%</span>
-                  <div class="progress flex-grow-1" style="height: 6px;">
-                    <div class="progress-bar ${emp.riskLevel === 'High' ? 'bg-danger' : 'bg-warning'}" style="width: ${emp.probability}%"></div>
-                  </div>
-                </div>
-            </td>
-            <td><button class="btn btn-sm btn-outline-primary" onclick="viewHistory('${emp.empCode}')">View</button></td>
-          `;
-          tbody.appendChild(tr);
-        });
-      };
-      
-      // Initial render
-      renderTable(currentData);
-      
-      // Filtering logic
-      const applyFilters = () => {
-        const d = filterDept.value;
-        const r = filterRisk.value;
-        
-        let filtered = allEmployees.filter(e => e.riskLevel !== 'Low'); // Base is High/Med
-        
-        if (d !== 'All') {
-          filtered = filtered.filter(e => e.department === d);
-        }
-        if (r !== 'All') {
-          filtered = filtered.filter(e => e.riskLevel === r);
-        }
-        
-        currentData = filtered;
-        renderTable(currentData);
-      };
-      
-      filterDept.addEventListener('change', applyFilters);
-      filterRisk.addEventListener('change', applyFilters);
-      
-      // Modal Logic
-      window.viewHistory = (empCode) => {
-        document.getElementById('modalEmpCode').textContent = empCode;
-        const hBody = document.getElementById('modalHistoryBody');
-        
-        // Generate some fake history for this employee based on current mock logic
-        const hist = window.MockData.history.filter(h => h.empCode === empCode);
-        
-        // If no history in mock, generate a dummy one
-        let historyData = hist.length > 0 ? hist : [
-          { date: '2024-07-15', prediction: 'Leave', probability: 78, modelVersion: 'v2.1.0' },
-          { date: '2024-06-15', prediction: 'Stay (At Risk)', probability: 65, modelVersion: 'v2.0.1' },
-          { date: '2024-05-15', prediction: 'Stay', probability: 40, modelVersion: 'v2.0.1' }
-        ];
-        
-        hBody.innerHTML = historyData.map(h => `
-          <tr>
-            <td>${h.date}</td>
-            <td class="fw-bold ${h.prediction.includes('Leave') ? 'text-danger' : 'text-success'}">${h.prediction}</td>
-            <td>${h.probability}%</td>
-            <td class="text-muted">${h.modelVersion}</td>
-          </tr>
-        `).join('');
-        
-        const modal = new bootstrap.Modal(document.getElementById('historyModal'));
-        modal.show();
-      };
-      
-      // Simple Sort Logic
-      let sortAsc = true;
-      let lastCol = -1;
-      
-      window.sortTable = (colIndex, isNumeric = false) => {
-        if (lastCol === colIndex) {
-          sortAsc = !sortAsc;
-        } else {
-          sortAsc = true;
-          lastCol = colIndex;
-        }
-        
-        const keys = ['empCode', 'department', 'jobRole', 'riskLevel', 'probability'];
-        const key = keys[colIndex];
-        
-        currentData.sort((a, b) => {
-          let valA = a[key];
-          let valB = b[key];
-          
-          if (isNumeric) {
-            return sortAsc ? valA - valB : valB - valA;
+          let dateStr = '-';
+          if (h.createdAt) {
+            const d = new Date(h.createdAt);
+            dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
           }
-          
-          valA = valA.toString().toLowerCase();
-          valB = valB.toString().toLowerCase();
-          
-          if (valA < valB) return sortAsc ? -1 : 1;
-          if (valA > valB) return sortAsc ? 1 : -1;
-          return 0;
-        });
+
+          return `
+            <tr>
+              <td>${dateStr}</td>
+              <td class="${predClass}">${isLeave ? 'Leave' : 'Stay'}</td>
+              <td class="fw-bold">${pct}%</td>
+              <td><span class="badge ${badgeCls}">${h.riskLevel || '-'}</span></td>
+              <td class="text-muted small">${escapeHtml(h.modelVersion || '-')}</td>
+              <td class="small">${escapeHtml(h.requestedBy || '-')}</td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        alertBox.className = 'alert alert-danger';
+        alertBox.textContent = 'Failed to load prediction history: ' + err.message;
+        alertBox.classList.remove('d-none');
+        hBody.innerHTML = '';
+      }
+    }
+
+    // ── Table Sorting ────────────────────────────────────────
+    function sortTable(key, isNumeric = false) {
+      if (currentSortKey === key) {
+        sortAsc = !sortAsc;
+      } else {
+        sortAsc = true;
+        currentSortKey = key;
+      }
+      
+      currentData.sort((a, b) => {
+        let valA = a[key] ?? '';
+        let valB = b[key] ?? '';
         
-        renderTable(currentData);
-      };
-    });
+        if (isNumeric) {
+          return sortAsc ? (Number(valA) - Number(valB)) : (Number(valB) - Number(valA));
+        }
+        
+        valA = valA.toString().toLowerCase();
+        valB = valB.toString().toLowerCase();
+        
+        if (valA < valB) return sortAsc ? -1 : 1;
+        if (valA > valB) return sortAsc ? 1 : -1;
+        return 0;
+      });
+      
+      renderTable(currentData);
+    }
+
+    function exportTableToCSV() {
+      if (currentData.length === 0) return;
+      let csv = 'EmpCode,Department,JobRole,RiskLevel,Probability,PredictedOn\n';
+      currentData.forEach(row => {
+        csv += `"${row.empCode || ''}","${row.employeeDepartment || ''}","${row.employeeJobRole || ''}","${row.riskLevel || ''}",${row.probability || 0},"${row.createdAt || ''}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', `high_risk_employees_${new Date().toISOString().slice(0,10)}.csv`);
+      a.click();
+    }
+
+    function showPageAlert(type, message) {
+      const alert = document.getElementById('pageAlert');
+      alert.className = `alert alert-${type}`;
+      alert.innerHTML = message;
+      alert.classList.remove('d-none');
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(str || ''));
+      return div.innerHTML;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadHighRisk);
   </script>
 </body>
 </html>
-
-
-
-

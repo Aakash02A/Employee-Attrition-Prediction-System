@@ -1,47 +1,25 @@
-# Employee Attrition Prediction System - Frontend (Phase 2)
+# Employee Attrition Prediction System - Frontend (Phase 10 Integration)
 
-This directory contains the Phase 2 UI/UX static frontend build for the Employee Attrition Prediction System. 
-It implements a modern, responsive, 3-column SaaS dashboard layout.
+This directory contains the frontend for the Employee Attrition Prediction System, fully integrated with the Spring Boot backend (`http://localhost:8080/api`) and FastAPI ML microservice (`http://localhost:8000`).
 
 ## Technologies Used
-- HTML5, CSS3, vanilla JavaScript
+- HTML5, CSS3, vanilla JavaScript (ES6+ async/await)
 - Bootstrap 5 (CSS & JS via CDN)
 - Bootstrap Icons (via CDN)
 - Chart.js (via CDN)
+- JWT Bearer Authentication & Session Storage
 
 ## File Structure
-- `login.html`: The authentication screen with simulated login logic.
-- `dashboard.html`: The main dashboard featuring KPIs, high-level charts, and contextual retention stats.
-- `employees.html`: Employee directory — searchable, filterable, paginated table with add/edit/delete UI (stubbed).
-- `prediction.html`: The form to input employee data and run ML predictions.
-- `analytics.html`: Detailed breakdowns of attrition drivers across the organization.
-- `high-risk.html`: A sortable, filterable list of employees flagged with High/Medium risk.
-- `history.html`: A paginated, filterable log of past predictions.
-- `settings.html`: User profile, ML model configuration, notification preferences, and security tabs.
-- `css/styles.css`: All custom styling, design tokens, and layout overrides. Includes a dark theme (`data-theme="dark"`).
-- `js/app.js`: Shared application logic (sidebar toggling, active links, logout, theme toggle).
-- `js/mock-data.js`: Centralized mock JSON data simulating backend API responses — including `analytics`, used by `analytics.html` so all pages read from one source.
+- `login.html`: Authenticates against `POST /api/auth/login` and stores JWT session token.
+- `dashboard.html`: Live executive dashboard querying `/api/analytics/dashboard`, `/api/analytics/by-department`, `/api/analytics/by-role`, and `/api/predictions`.
+- `employees.html`: Full CRUD employee directory (GET, POST, PUT, DELETE `/api/employees`) supporting all 30 ML model feature fields.
+- `prediction.html`: Live ML inference interface calling `POST /api/predict` via Spring Boot and FastAPI model v2.
+- `analytics.html`: Detailed organization-wide charts populated from `/api/analytics/*` endpoints.
+- `high-risk.html`: High and medium risk employee dashboard with individual prediction history modal.
+- `history.html`: Paginated log of historical predictions from `/api/predictions` with search and date filters.
+- `settings.html`: User profile and configuration preferences.
+- `css/styles.css`: Custom design tokens, dark mode styles, and responsive SaaS layout.
+- `js/api.js`: Unified API client managing JWT authentication and REST API endpoints.
+- `js/app.js`: Shared shell logic, dynamic header user profile, dark mode toggle, and logout handlers.
+- `js/sidebar.js`: Shared navigation sidebar component.
 
-## Change Log
-- Fixed a UTF-8 BOM and mojibake arrow characters (↑/↓) in `dashboard.html` that were introduced when the file was saved in a non-UTF-8-safe editor.
-- Removed `temp_script.js`, an unreferenced leftover copy of the dashboard's inline chart-init script.
-- Moved `analytics.html`'s chart data out of inline hardcoded arrays into `MockData.analytics` in `js/mock-data.js`, matching the pattern used by every other page.
-- Wired up the previously non-functional date filter on `history.html`.
-
-## Backend Integration Guide (Phase 3+)
-The current application uses static/mock data to demonstrate functionality. When wiring up the real backend, look for these areas:
-
-1. **Authentication (`login.html`)**:
-   - Locate `fakeLogin()` logic inside the `<script>` tag. Replace the `setTimeout` with a real `fetch('/api/auth/login')` call.
-
-2. **Dashboard & Analytics (`js/mock-data.js`)**:
-   - The global `MockData` object supplies all KPIs and chart data.
-   - Replace the static assignment of `window.MockData` with a data fetching service that retrieves this data from the backend (e.g., `/api/dashboard/stats`).
-
-3. **Running a Prediction (`prediction.html`)**:
-   - Locate the `<script>` tag at the bottom.
-   - The form submission currently triggers a mocked probability calculation. Replace this with a POST request to `/api/predict` sending the form fields as JSON. The result card UI updating logic is already in place to handle the response.
-
-4. **Data Tables (`high-risk.html`, `history.html`)**:
-   - These pages pull from `MockData.employees` and `MockData.history`.
-   - Update the `currentData` initialization to fetch from endpoints like `/api/employees/high-risk` and `/api/predictions/history`. Pagination logic in `history.html` may need to be updated from client-side to server-side depending on dataset size.

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -17,7 +17,7 @@
   
   <!-- Custom CSS -->
   <link rel="stylesheet" href="css/styles.css">
-<script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');document.documentElement.setAttribute('data-bs-theme', 'dark');}</script>
+  <script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');document.documentElement.setAttribute('data-bs-theme', 'dark');}</script>
 </head>
 <body>
 
@@ -48,25 +48,29 @@
         </button>
       </form>
       
-      <!-- Instructions for demo -->
+      <!-- Instructions / credentials hint -->
       <div class="mt-4 text-center text-muted small">
-        <p><em>Demo Hint: Any input will work.</em></p>
+        <p class="mb-0"><em>Default Admin: <code>admin@eaps.com</code> / <code>admin123</code></em></p>
       </div>
     </div>
   </div>
 
+  <script src="js/api.js"></script>
   <script>
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    // If already logged in, redirect to dashboard
+    if (Auth.getToken()) {
+      window.location.href = 'dashboard.html';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
-      const email = document.getElementById('email').value;
+      const email = document.getElementById('email').value.trim();
       const pass = document.getElementById('password').value;
       const alertBox = document.getElementById('loginAlert');
       const btnText = document.getElementById('btnText');
       const btnSpinner = document.getElementById('btnSpinner');
       const loginBtn = document.getElementById('loginBtn');
-      
-      // Basic client validation is handled by HTML5 (required, type="email")
       
       // UI Loading state
       loginBtn.disabled = true;
@@ -74,25 +78,17 @@
       btnSpinner.classList.remove('d-none');
       alertBox.classList.add('d-none');
       
-      // Stub fakeLogin() simulating POST to /api/auth/login
-      setTimeout(() => {
-        // Simulate success vs failure (toggle this logic to test failure)
-        const simulateSuccess = true; 
-        
-        if (simulateSuccess) {
-          window.location.href = 'dashboard.html';
-        } else {
-          // Failure case
-          loginBtn.disabled = false;
-          btnText.textContent = 'Log In';
-          btnSpinner.classList.add('d-none');
-          alertBox.classList.remove('d-none');
-        }
-      }, 1000);
+      try {
+        await Auth.login(email, pass);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        alertBox.textContent = err.message || 'Invalid email or password.';
+        alertBox.classList.remove('d-none');
+        loginBtn.disabled = false;
+        btnText.textContent = 'Log In';
+        btnSpinner.classList.add('d-none');
+      }
     });
   </script>
 </body>
 </html>
-
-
-

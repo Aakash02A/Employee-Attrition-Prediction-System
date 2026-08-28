@@ -12,7 +12,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="css/styles.css">
-<script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');document.documentElement.setAttribute('data-bs-theme', 'dark');}</script>
+  <script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');document.documentElement.setAttribute('data-bs-theme', 'dark');}</script>
 </head>
 <body>
 
@@ -43,13 +43,12 @@
           <div class="user-profile dropdown">
             <div class="d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
               <div class="user-info d-none d-sm-flex me-2">
-                <span class="user-name">Robert Brown</span>
+                <span class="user-name">Admin</span>
                 <span class="user-role">HR Manager</span>
               </div>
-              <img src="https://i.pravatar.cc/150?u=robert" alt="User" class="user-avatar" style="object-fit: cover;">
+              <img src="https://i.pravatar.cc/150?u=admin" alt="User" class="user-avatar" style="object-fit: cover;">
             </div>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-              <li><a class="dropdown-item" href="#">Profile</a></li>
               <li><a class="dropdown-item" href="settings.html">Settings</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Logout</a></li>
@@ -63,10 +62,13 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Employees Directory</h1>
-            <div class="page-subtitle">Manage and view all employee records.</div>
+            <div class="page-subtitle">Manage employee records and configure ML feature profiles.</div>
           </div>
           <button class="btn btn-primary" onclick="openAddModal()"><i class="bi bi-plus-lg me-1"></i> Add Employee</button>
         </div>
+
+        <!-- Notification Alert -->
+        <div id="pageAlert" class="alert d-none mb-3" role="alert"></div>
 
         <!-- Filter Bar -->
         <div class="saas-card py-3 mb-4">
@@ -74,17 +76,19 @@
             <div class="col-md-4">
               <div class="position-relative">
                 <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                <input type="text" class="form-control ps-5" id="searchEmp" placeholder="Search by ID or Role...">
+                <input type="text" class="form-control ps-5" id="searchEmp" placeholder="Search by Code, Role, or Department...">
               </div>
             </div>
             <div class="col-md-3">
               <select class="form-select" id="filterDept">
                 <option value="All">All Departments</option>
-                <option value="Sales">Sales</option>
                 <option value="Research & Development">Research & Development</option>
+                <option value="Sales">Sales</option>
                 <option value="Human Resources">Human Resources</option>
-                <option value="Support">Support</option>
               </select>
+            </div>
+            <div class="col-md-auto ms-auto">
+              <button class="btn btn-outline-secondary btn-sm" onclick="loadEmployees()"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
             </div>
           </div>
         </div>
@@ -95,15 +99,21 @@
               <thead>
                 <tr>
                   <th>Emp Code</th>
-                  <th>Age</th>
+                  <th>Age / Gender</th>
                   <th>Department</th>
                   <th>Job Role</th>
-                  <th>Years at Company</th>
-                  <th>Actions</th>
+                  <th>Monthly Income</th>
+                  <th>Years at Co.</th>
+                  <th>Latest Risk</th>
+                  <th class="text-end">Actions</th>
                 </tr>
               </thead>
               <tbody id="empTableBody">
-                <!-- Populated via JS -->
+                <tr>
+                  <td colspan="8" class="text-center py-5 text-muted">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span> Loading employees from database...
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -111,7 +121,7 @@
 
         <!-- Pagination -->
         <nav aria-label="Page navigation" class="mt-4 d-flex justify-content-between align-items-center">
-          <div class="text-muted small" id="pageInfo">Showing 1 to 10 of 30 entries</div>
+          <div class="text-muted small" id="pageInfo">Showing 0 entries</div>
           <ul class="pagination pagination-sm mb-0">
             <li class="page-item disabled" id="btnPrev"><a class="page-link" href="#" onclick="event.preventDefault(); changePage(-1)">Previous</a></li>
             <li class="page-item active"><a class="page-link" href="#" id="pageNum">1</a></li>
@@ -123,88 +133,274 @@
     </main>
   </div>
 
-  <!-- Add Employee Modal -->
-  <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+  <!-- Unified Add / Edit Employee Modal with all 30 ML Feature Fields -->
+  <div class="modal fade" id="employeeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Add Employee</h5>
+          <h5 class="modal-title" id="employeeModalTitle">Add Employee</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="addEmployeeForm">
-            <div class="mb-3">
-              <label for="addEmpCode" class="form-label">Employee Code</label>
-              <input type="text" class="form-control" id="addEmpCode" placeholder="e.g. EMP123" required>
-            </div>
-            <div class="mb-3">
-              <label for="addAge" class="form-label">Age</label>
-              <input type="number" class="form-control" id="addAge" required>
-            </div>
-            <div class="mb-3">
-              <label for="addDept" class="form-label">Department</label>
-              <select class="form-select" id="addDept" required>
-                <option value="Sales">Sales</option>
-                <option value="Research & Development">Research & Development</option>
-                <option value="Human Resources">Human Resources</option>
-                <option value="Support">Support</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="addRole" class="form-label">Job Role</label>
-              <input type="text" class="form-control" id="addRole" required>
-            </div>
-            <div class="mb-3">
-              <label for="addYears" class="form-label">Years at Company</label>
-              <input type="number" class="form-control" id="addYears" required>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="saveNewEmployee()">Add Employee</button>
-        </div>
-      </div>
-    </div>
-  </div>
+          <div id="modalAlert" class="alert d-none mb-3" role="alert"></div>
 
-  <!-- Edit Employee Modal -->
-  <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Edit Employee</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="editEmployeeForm">
-            <input type="hidden" id="editEmpCode">
-            <div class="mb-3">
-              <label for="editAge" class="form-label">Age</label>
-              <input type="number" class="form-control" id="editAge" required>
-            </div>
-            <div class="mb-3">
-              <label for="editDept" class="form-label">Department</label>
-              <select class="form-select" id="editDept" required>
-                <option value="Sales">Sales</option>
-                <option value="Research & Development">Research & Development</option>
-                <option value="Human Resources">Human Resources</option>
-                <option value="Support">Support</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="editRole" class="form-label">Job Role</label>
-              <input type="text" class="form-control" id="editRole" required>
-            </div>
-            <div class="mb-3">
-              <label for="editYears" class="form-label">Years at Company</label>
-              <input type="number" class="form-control" id="editYears" required>
+          <form id="employeeForm">
+            <input type="hidden" id="empId">
+
+            <!-- Nav Tabs for clean 30-field organization -->
+            <ul class="nav nav-tabs mb-3" id="formTabs" role="tablist">
+              <li class="nav-item">
+                <button class="nav-link active" id="tab-personal-btn" data-bs-toggle="tab" data-bs-target="#tab-personal" type="button" role="tab">1. Personal</button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" id="tab-job-btn" data-bs-toggle="tab" data-bs-target="#tab-job" type="button" role="tab">2. Job & Role</button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" id="tab-comp-btn" data-bs-toggle="tab" data-bs-target="#tab-comp" type="button" role="tab">3. Compensation</button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" id="tab-satisfaction-btn" data-bs-toggle="tab" data-bs-target="#tab-satisfaction" type="button" role="tab">4. Ratings & Satisfaction</button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" id="tab-exp-btn" data-bs-toggle="tab" data-bs-target="#tab-exp" type="button" role="tab">5. Experience</button>
+              </li>
+            </ul>
+
+            <div class="tab-content">
+              <!-- 1. Personal -->
+              <div class="tab-pane fade show active" id="tab-personal" role="tabpanel">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label">Age (18-60) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_age" min="18" max="60" value="30" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Gender <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_gender" required>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Marital Status <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_maritalStatus" required>
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Divorced">Divorced</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Distance From Home (0-50 km) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_distanceFromHome" min="0" max="50" value="5" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Education Level (1-5) <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_education" required>
+                      <option value="1">1 - Below College</option>
+                      <option value="2">2 - College</option>
+                      <option value="3" selected>3 - Bachelor</option>
+                      <option value="4">4 - Master</option>
+                      <option value="5">5 - Doctor</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Education Field <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_educationField" required>
+                      <option value="Life Sciences">Life Sciences</option>
+                      <option value="Medical">Medical</option>
+                      <option value="Marketing">Marketing</option>
+                      <option value="Technical Degree">Technical Degree</option>
+                      <option value="Human Resources">Human Resources</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Job & Role -->
+              <div class="tab-pane fade" id="tab-job" role="tabpanel">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Department <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_department" required>
+                      <option value="Research & Development">Research & Development</option>
+                      <option value="Sales">Sales</option>
+                      <option value="Human Resources">Human Resources</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Job Role <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_jobRole" required>
+                      <option value="Healthcare Representative">Healthcare Representative</option>
+                      <option value="Human Resources">Human Resources</option>
+                      <option value="Laboratory Technician">Laboratory Technician</option>
+                      <option value="Manager">Manager</option>
+                      <option value="Manufacturing Director">Manufacturing Director</option>
+                      <option value="Research Director">Research Director</option>
+                      <option value="Research Scientist">Research Scientist</option>
+                      <option value="Sales Executive">Sales Executive</option>
+                      <option value="Sales Representative">Sales Representative</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Job Level (1-5) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_jobLevel" min="1" max="5" value="2" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Business Travel <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_businessTravel" required>
+                      <option value="Non-Travel">Non-Travel</option>
+                      <option value="Travel_Rarely" selected>Travel_Rarely</option>
+                      <option value="Travel_Frequently">Travel_Frequently</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">OverTime <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_overTime" required>
+                      <option value="No">No</option>
+                      <option value="Yes">Yes</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Job Involvement (1-4) <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_jobInvolvement" required>
+                      <option value="1">1 - Low</option>
+                      <option value="2">2 - Medium</option>
+                      <option value="3" selected>3 - High</option>
+                      <option value="4">4 - Very High</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Job Satisfaction (1-4) <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_jobSatisfaction" required>
+                      <option value="1">1 - Low</option>
+                      <option value="2">2 - Medium</option>
+                      <option value="3" selected>3 - High</option>
+                      <option value="4">4 - Very High</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Compensation -->
+              <div class="tab-pane fade" id="tab-comp" role="tabpanel">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label">Monthly Income ($1,000 - $25,000) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_monthlyIncome" min="1000" max="25000" value="5000" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Daily Rate ($100 - $1,500) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_dailyRate" min="100" max="1500" value="800" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Hourly Rate ($20 - $110) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_hourlyRate" min="20" max="110" value="65" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Monthly Rate ($2,000 - $27,000) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_monthlyRate" min="2000" max="27000" value="14000" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Percent Salary Hike (10% - 25%) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_percentSalaryHike" min="10" max="25" value="14" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Stock Option Level (0-3) <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_stockOptionLevel" required>
+                      <option value="0">0</option>
+                      <option value="1" selected>1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. Ratings & Satisfaction -->
+              <div class="tab-pane fade" id="tab-satisfaction" role="tabpanel">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Performance Rating (1-4) <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_performanceRating" required>
+                      <option value="1">1 - Low</option>
+                      <option value="2">2 - Good</option>
+                      <option value="3" selected>3 - Excellent</option>
+                      <option value="4">4 - Outstanding</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Environment Satisfaction (1-4) <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_environmentSatisfaction" required>
+                      <option value="1">1 - Low</option>
+                      <option value="2">2 - Medium</option>
+                      <option value="3" selected>3 - High</option>
+                      <option value="4">4 - Very High</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Relationship Satisfaction (1-4) <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_relationshipSatisfaction" required>
+                      <option value="1">1 - Low</option>
+                      <option value="2">2 - Medium</option>
+                      <option value="3" selected>3 - High</option>
+                      <option value="4">4 - Very High</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Work Life Balance (1-4) <span class="text-danger">*</span></label>
+                    <select class="form-select" id="f_workLifeBalance" required>
+                      <option value="1">1 - Bad</option>
+                      <option value="2">2 - Good</option>
+                      <option value="3" selected>3 - Better</option>
+                      <option value="4">4 - Best</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. Experience -->
+              <div class="tab-pane fade" id="tab-exp" role="tabpanel">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="form-label">Total Working Years (0-45) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_totalWorkingYears" min="0" max="45" value="8" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Num Companies Worked (0-10) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_numCompaniesWorked" min="0" max="10" value="2" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Training Times Last Year (0-6) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_trainingTimesLastYear" min="0" max="6" value="3" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Years At Company (0-45) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_yearsAtCompany" min="0" max="45" value="5" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Years In Current Role (0-20) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_yearsInCurrentRole" min="0" max="20" value="3" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Years Since Last Promotion (0-15) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_yearsSinceLastPromotion" min="0" max="15" value="1" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Years With Current Manager (0-20) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="f_yearsWithCurrManager" min="0" max="20" value="3" required>
+                  </div>
+                </div>
+              </div>
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="saveEmployeeEdit()">Save Changes</button>
+          <button type="button" class="btn btn-primary" id="saveEmployeeBtn" onclick="submitEmployeeForm()">
+            <span id="saveBtnText">Save Employee</span>
+            <span id="saveBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+          </button>
         </div>
       </div>
     </div>
@@ -212,201 +408,354 @@
 
   <!-- Delete Employee Modal -->
   <div class="modal fade" id="deleteEmployeeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">Confirm Delete</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          Are you sure you want to delete the record for employee <strong id="deleteEmpCodeDisplay"></strong>? This action cannot be undone.
-          <input type="hidden" id="deleteEmpCode">
+          <div id="deleteModalAlert" class="alert d-none" role="alert"></div>
+          Are you sure you want to delete employee <strong id="deleteEmpCodeDisplay"></strong> (ID: <span id="deleteEmpIdDisplay"></span>)? This action cannot be undone.
+          <input type="hidden" id="deleteEmpId">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-danger" onclick="confirmDeleteEmployee()">Delete</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDeleteEmployee()">
+            <span id="delBtnText">Delete</span>
+            <span id="delBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+          </button>
         </div>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/app.js"></script>
   
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const allEmployees = window.MockData.employees;
-      let currentData = [...allEmployees];
+    Auth.requireLogin();
+
+    let allEmployees = [];
+    let currentData = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    const tbody = document.getElementById('empTableBody');
+    const searchEmp = document.getElementById('searchEmp');
+    const filterDept = document.getElementById('filterDept');
+
+    // ── Load Employees from Backend ──────────────────────────
+    async function loadEmployees() {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" class="text-center py-5 text-muted">
+            <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span> Loading employees...
+          </td>
+        </tr>`;
       
-      const tbody = document.getElementById('empTableBody');
-      const searchEmp = document.getElementById('searchEmp');
-      const filterDept = document.getElementById('filterDept');
+      try {
+        allEmployees = await Api.getEmployees();
+        applyFilters();
+      } catch (err) {
+        showPageAlert('danger', 'Failed to load employees: ' + escapeHtml(err.message));
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">Error: ${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    // ── Render Table ─────────────────────────────────────────
+    function renderTable() {
+      tbody.innerHTML = '';
       
-      // Pagination state
-      let currentPage = 1;
-      const itemsPerPage = 10;
+      const total = currentData.length;
+      const totalPages = Math.ceil(total / itemsPerPage);
       
-      const renderTable = () => {
-        tbody.innerHTML = '';
-        
-        const total = currentData.length;
-        const totalPages = Math.ceil(total / itemsPerPage);
-        
-        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-        
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = Math.min(start + itemsPerPage, total);
-        
-        const pageData = currentData.slice(start, end);
-        
-        if (pageData.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No employees found.</td></tr>';
-          document.getElementById('pageInfo').textContent = 'Showing 0 entries';
-          document.getElementById('btnPrev').classList.add('disabled');
-          document.getElementById('btnNext').classList.add('disabled');
-          return;
+      if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+      
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = Math.min(start + itemsPerPage, total);
+      
+      const pageData = currentData.slice(start, end);
+      
+      if (pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">No employees found.</td></tr>';
+        document.getElementById('pageInfo').textContent = 'Showing 0 entries';
+        document.getElementById('btnPrev').classList.add('disabled');
+        document.getElementById('btnNext').classList.add('disabled');
+        return;
+      }
+      
+      document.getElementById('pageInfo').textContent = `Showing ${start + 1} to ${end} of ${total} entries`;
+      document.getElementById('pageNum').textContent = currentPage;
+      
+      document.getElementById('btnPrev').classList.toggle('disabled', currentPage === 1);
+      document.getElementById('btnNext').classList.toggle('disabled', currentPage >= totalPages);
+      
+      pageData.forEach(emp => {
+        let riskBadge = '<span class="badge bg-light text-muted border">Unpredicted</span>';
+        if (emp.latestRiskLevel === 'HIGH') {
+          riskBadge = '<span class="badge badge-high">High Risk</span>';
+        } else if (emp.latestRiskLevel === 'MEDIUM') {
+          riskBadge = '<span class="badge badge-med">Medium Risk</span>';
+        } else if (emp.latestRiskLevel === 'LOW') {
+          riskBadge = '<span class="badge badge-low">Low Risk</span>';
         }
-        
-        document.getElementById('pageInfo').textContent = `Showing ${start + 1} to ${end} of ${total} entries`;
-        document.getElementById('pageNum').textContent = currentPage;
-        
-        document.getElementById('btnPrev').classList.toggle('disabled', currentPage === 1);
-        document.getElementById('btnNext').classList.toggle('disabled', currentPage === totalPages);
-        
-        pageData.forEach(emp => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="fw-bold">${emp.empCode}</td>
-            <td>${emp.age}</td>
-            <td>${emp.department}</td>
-            <td>${emp.jobRole}</td>
-            <td>${emp.yearsAtCompany} Years</td>
-            <td>
-              <button class="btn btn-sm btn-outline-secondary me-1" onclick="openEditModal('${emp.empCode}')"><i class="bi bi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger" onclick="openDeleteModal('${emp.empCode}')"><i class="bi bi-trash"></i></button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      };
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="fw-bold text-dark">${escapeHtml(emp.empCode)}</td>
+          <td>${emp.age || '-'} / ${escapeHtml(emp.gender || '-')}</td>
+          <td>${escapeHtml(emp.department || '-')}</td>
+          <td>${escapeHtml(emp.jobRole || '-')}</td>
+          <td>${emp.monthlyIncome ? formatCurrency(emp.monthlyIncome) : '-'}</td>
+          <td>${emp.yearsAtCompany ?? '-'} yrs</td>
+          <td>${riskBadge}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-secondary me-1" title="Edit" onclick="openEditModal(${emp.id})"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-sm btn-outline-danger" title="Delete" onclick="openDeleteModal(${emp.id}, '${escapeHtml(emp.empCode)}')"><i class="bi bi-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function changePage(dir) {
+      currentPage += dir;
+      renderTable();
+    }
+
+    function applyFilters() {
+      const search = searchEmp.value.toLowerCase().trim();
+      const dept = filterDept.value;
       
-      window.changePage = (dir) => {
-        currentPage += dir;
-        renderTable();
+      let filtered = allEmployees;
+      
+      if (search) {
+        filtered = filtered.filter(e => 
+          (e.empCode && e.empCode.toLowerCase().includes(search)) || 
+          (e.jobRole && e.jobRole.toLowerCase().includes(search)) ||
+          (e.department && e.department.toLowerCase().includes(search))
+        );
+      }
+      if (dept !== 'All') {
+        filtered = filtered.filter(e => e.department === dept);
+      }
+      
+      currentData = filtered;
+      currentPage = 1;
+      renderTable();
+    }
+
+    searchEmp.addEventListener('input', applyFilters);
+    filterDept.addEventListener('change', applyFilters);
+
+    // ── Add Employee ─────────────────────────────────────────
+    function openAddModal() {
+      document.getElementById('empId').value = '';
+      document.getElementById('employeeModalTitle').textContent = 'Add Employee';
+      document.getElementById('saveBtnText').textContent = 'Create Employee';
+      document.getElementById('modalAlert').classList.add('d-none');
+      document.getElementById('employeeForm').reset();
+
+      // Reset to first tab
+      const firstTab = new bootstrap.Tab(document.getElementById('tab-personal-btn'));
+      firstTab.show();
+
+      const modal = new bootstrap.Modal(document.getElementById('employeeModal'));
+      modal.show();
+    }
+
+    // ── Edit Employee ────────────────────────────────────────
+    function openEditModal(id) {
+      const emp = allEmployees.find(e => e.id === id);
+      if (!emp) return;
+
+      document.getElementById('empId').value = emp.id;
+      document.getElementById('employeeModalTitle').textContent = `Edit Employee (${emp.empCode})`;
+      document.getElementById('saveBtnText').textContent = 'Save Changes';
+      document.getElementById('modalAlert').classList.add('d-none');
+
+      // Populate all 30 fields
+      document.getElementById('f_age').value = emp.age ?? 30;
+      document.getElementById('f_gender').value = emp.gender ?? 'Male';
+      document.getElementById('f_maritalStatus').value = emp.maritalStatus ?? 'Single';
+      document.getElementById('f_distanceFromHome').value = emp.distanceFromHome ?? 5;
+      document.getElementById('f_education').value = emp.education ?? 3;
+      document.getElementById('f_educationField').value = emp.educationField ?? 'Life Sciences';
+
+      document.getElementById('f_department').value = emp.department ?? 'Research & Development';
+      document.getElementById('f_jobRole').value = emp.jobRole ?? 'Research Scientist';
+      document.getElementById('f_jobLevel').value = emp.jobLevel ?? 2;
+      document.getElementById('f_businessTravel').value = emp.businessTravel ?? 'Travel_Rarely';
+      document.getElementById('f_overTime').value = emp.overTime ?? 'No';
+      document.getElementById('f_jobInvolvement').value = emp.jobInvolvement ?? 3;
+      document.getElementById('f_jobSatisfaction').value = emp.jobSatisfaction ?? 3;
+
+      document.getElementById('f_monthlyIncome').value = emp.monthlyIncome ?? 5000;
+      document.getElementById('f_dailyRate').value = emp.dailyRate ?? 800;
+      document.getElementById('f_hourlyRate').value = emp.hourlyRate ?? 65;
+      document.getElementById('f_monthlyRate').value = emp.monthlyRate ?? 14000;
+      document.getElementById('f_percentSalaryHike').value = emp.percentSalaryHike ?? 14;
+      document.getElementById('f_stockOptionLevel').value = emp.stockOptionLevel ?? 1;
+
+      document.getElementById('f_performanceRating').value = emp.performanceRating ?? 3;
+      document.getElementById('f_environmentSatisfaction').value = emp.environmentSatisfaction ?? 3;
+      document.getElementById('f_relationshipSatisfaction').value = emp.relationshipSatisfaction ?? 3;
+      document.getElementById('f_workLifeBalance').value = emp.workLifeBalance ?? 3;
+
+      document.getElementById('f_totalWorkingYears').value = emp.totalWorkingYears ?? 8;
+      document.getElementById('f_numCompaniesWorked').value = emp.numCompaniesWorked ?? 2;
+      document.getElementById('f_trainingTimesLastYear').value = emp.trainingTimesLastYear ?? 3;
+      document.getElementById('f_yearsAtCompany').value = emp.yearsAtCompany ?? 5;
+      document.getElementById('f_yearsInCurrentRole').value = emp.yearsInCurrentRole ?? 3;
+      document.getElementById('f_yearsSinceLastPromotion').value = emp.yearsSinceLastPromotion ?? 1;
+      document.getElementById('f_yearsWithCurrManager').value = emp.yearsWithCurrManager ?? 3;
+
+      // Reset to first tab
+      const firstTab = new bootstrap.Tab(document.getElementById('tab-personal-btn'));
+      firstTab.show();
+
+      const modal = new bootstrap.Modal(document.getElementById('employeeModal'));
+      modal.show();
+    }
+
+    // ── Save Employee (Create or Update) ──────────────────────
+    async function submitEmployeeForm() {
+      const form = document.getElementById('employeeForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const id = document.getElementById('empId').value;
+      const payload = {
+        age: parseInt(document.getElementById('f_age').value, 10),
+        gender: document.getElementById('f_gender').value,
+        maritalStatus: document.getElementById('f_maritalStatus').value,
+        distanceFromHome: parseInt(document.getElementById('f_distanceFromHome').value, 10),
+        education: parseInt(document.getElementById('f_education').value, 10),
+        educationField: document.getElementById('f_educationField').value,
+        department: document.getElementById('f_department').value,
+        jobRole: document.getElementById('f_jobRole').value,
+        jobLevel: parseInt(document.getElementById('f_jobLevel').value, 10),
+        jobInvolvement: parseInt(document.getElementById('f_jobInvolvement').value, 10),
+        jobSatisfaction: parseInt(document.getElementById('f_jobSatisfaction').value, 10),
+        businessTravel: document.getElementById('f_businessTravel').value,
+        overTime: document.getElementById('f_overTime').value,
+        dailyRate: parseInt(document.getElementById('f_dailyRate').value, 10),
+        hourlyRate: parseInt(document.getElementById('f_hourlyRate').value, 10),
+        monthlyIncome: parseInt(document.getElementById('f_monthlyIncome').value, 10),
+        monthlyRate: parseInt(document.getElementById('f_monthlyRate').value, 10),
+        percentSalaryHike: parseInt(document.getElementById('f_percentSalaryHike').value, 10),
+        stockOptionLevel: parseInt(document.getElementById('f_stockOptionLevel').value, 10),
+        performanceRating: parseInt(document.getElementById('f_performanceRating').value, 10),
+        environmentSatisfaction: parseInt(document.getElementById('f_environmentSatisfaction').value, 10),
+        relationshipSatisfaction: parseInt(document.getElementById('f_relationshipSatisfaction').value, 10),
+        workLifeBalance: parseInt(document.getElementById('f_workLifeBalance').value, 10),
+        totalWorkingYears: parseInt(document.getElementById('f_totalWorkingYears').value, 10),
+        numCompaniesWorked: parseInt(document.getElementById('f_numCompaniesWorked').value, 10),
+        trainingTimesLastYear: parseInt(document.getElementById('f_trainingTimesLastYear').value, 10),
+        yearsAtCompany: parseInt(document.getElementById('f_yearsAtCompany').value, 10),
+        yearsInCurrentRole: parseInt(document.getElementById('f_yearsInCurrentRole').value, 10),
+        yearsSinceLastPromotion: parseInt(document.getElementById('f_yearsSinceLastPromotion').value, 10),
+        yearsWithCurrManager: parseInt(document.getElementById('f_yearsWithCurrManager').value, 10),
       };
 
-      window.openAddModal = () => {
-        document.getElementById('addEmployeeForm').reset();
-        const modal = new bootstrap.Modal(document.getElementById('addEmployeeModal'));
-        modal.show();
-      };
-      
-      window.saveNewEmployee = () => {
-        const empCode = document.getElementById('addEmpCode').value || ('EMP' + Math.floor(Math.random() * 1000));
-        const age = parseInt(document.getElementById('addAge').value) || 30;
-        const department = document.getElementById('addDept').value;
-        const jobRole = document.getElementById('addRole').value || 'New Role';
-        const yearsAtCompany = parseInt(document.getElementById('addYears').value) || 0;
-        
-        allEmployees.unshift({
-          empCode,
-          age,
-          department,
-          jobRole,
-          yearsAtCompany
-        });
-        
-        applyFilters(); // Re-render table
-        
-        const modalEl = document.getElementById('addEmployeeModal');
+      const btn = document.getElementById('saveEmployeeBtn');
+      const spinner = document.getElementById('saveBtnSpinner');
+      const text = document.getElementById('saveBtnText');
+      const modalAlert = document.getElementById('modalAlert');
+
+      btn.disabled = true;
+      spinner.classList.remove('d-none');
+      text.textContent = 'Saving...';
+      modalAlert.classList.add('d-none');
+
+      try {
+        if (id) {
+          await Api.updateEmployee(id, payload);
+          showPageAlert('success', `Employee #${id} updated successfully.`);
+        } else {
+          const created = await Api.createEmployee(payload);
+          showPageAlert('success', `Employee ${created.empCode || '#' + created.id} created successfully.`);
+        }
+
+        const modalEl = document.getElementById('employeeModal');
         const modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
-      };
+        if (modal) modal.hide();
 
-      window.openEditModal = (empCode) => {
-        const emp = allEmployees.find(e => e.empCode === empCode);
-        if (!emp) return;
-        
-        document.getElementById('editEmpCode').value = emp.empCode;
-        document.getElementById('editAge').value = emp.age;
-        document.getElementById('editDept').value = emp.department;
-        document.getElementById('editRole').value = emp.jobRole;
-        document.getElementById('editYears').value = emp.yearsAtCompany;
-        
-        const modal = new bootstrap.Modal(document.getElementById('editEmployeeModal'));
-        modal.show();
-      };
-      
-      window.saveEmployeeEdit = () => {
-        const empCode = document.getElementById('editEmpCode').value;
-        const emp = allEmployees.find(e => e.empCode === empCode);
-        if (emp) {
-          emp.age = parseInt(document.getElementById('editAge').value) || emp.age;
-          emp.department = document.getElementById('editDept').value;
-          emp.jobRole = document.getElementById('editRole').value;
-          emp.yearsAtCompany = parseInt(document.getElementById('editYears').value) || emp.yearsAtCompany;
-          
-          applyFilters(); // Re-render table
-          
-          const modalEl = document.getElementById('editEmployeeModal');
-          const modal = bootstrap.Modal.getInstance(modalEl);
-          modal.hide();
-        }
-      };
+        await loadEmployees();
+      } catch (err) {
+        modalAlert.className = 'alert alert-danger';
+        modalAlert.textContent = err.message || 'Failed to save employee.';
+        modalAlert.classList.remove('d-none');
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('d-none');
+        text.textContent = id ? 'Save Changes' : 'Save Employee';
+      }
+    }
 
-      window.openDeleteModal = (empCode) => {
-        document.getElementById('deleteEmpCode').value = empCode;
-        document.getElementById('deleteEmpCodeDisplay').textContent = empCode;
-        
-        const modal = new bootstrap.Modal(document.getElementById('deleteEmployeeModal'));
-        modal.show();
-      };
-      
-      window.confirmDeleteEmployee = () => {
-        const empCode = document.getElementById('deleteEmpCode').value;
-        const idx = allEmployees.findIndex(e => e.empCode === empCode);
-        if (idx > -1) {
-          allEmployees.splice(idx, 1);
-          applyFilters(); // Re-render table
-        }
-        
+    // ── Delete Employee ──────────────────────────────────────
+    function openDeleteModal(id, empCode) {
+      document.getElementById('deleteEmpId').value = id;
+      document.getElementById('deleteEmpIdDisplay').textContent = id;
+      document.getElementById('deleteEmpCodeDisplay').textContent = empCode || '#' + id;
+      document.getElementById('deleteModalAlert').classList.add('d-none');
+
+      const modal = new bootstrap.Modal(document.getElementById('deleteEmployeeModal'));
+      modal.show();
+    }
+
+    async function confirmDeleteEmployee() {
+      const id = document.getElementById('deleteEmpId').value;
+      const btn = document.getElementById('confirmDeleteBtn');
+      const spinner = document.getElementById('delBtnSpinner');
+      const text = document.getElementById('delBtnText');
+      const alertBox = document.getElementById('deleteModalAlert');
+
+      btn.disabled = true;
+      spinner.classList.remove('d-none');
+      text.textContent = 'Deleting...';
+      alertBox.classList.add('d-none');
+
+      try {
+        await Api.deleteEmployee(id);
         const modalEl = document.getElementById('deleteEmployeeModal');
         const modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
-      };
-      
-      const applyFilters = () => {
-        const search = searchEmp.value.toLowerCase();
-        const dept = filterDept.value;
-        
-        let filtered = allEmployees;
-        
-        if (search) {
-          filtered = filtered.filter(e => 
-            e.empCode.toLowerCase().includes(search) || 
-            e.jobRole.toLowerCase().includes(search)
-          );
-        }
-        if (dept !== 'All') {
-          filtered = filtered.filter(e => e.department === dept);
-        }
-        
-        currentData = filtered;
-        currentPage = 1;
-        renderTable();
-      };
-      
-      searchEmp.addEventListener('input', applyFilters);
-      filterDept.addEventListener('change', applyFilters);
-      
-      renderTable();
-    });
+        if (modal) modal.hide();
+
+        showPageAlert('success', `Employee #${id} deleted successfully.`);
+        await loadEmployees();
+      } catch (err) {
+        alertBox.className = 'alert alert-danger';
+        alertBox.textContent = err.message || 'Failed to delete employee.';
+        alertBox.classList.remove('d-none');
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('d-none');
+        text.textContent = 'Delete';
+      }
+    }
+
+    // ── Alert Helpers ────────────────────────────────────────
+    function showPageAlert(type, message) {
+      const alert = document.getElementById('pageAlert');
+      alert.className = `alert alert-${type}`;
+      alert.innerHTML = message;
+      alert.classList.remove('d-none');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(str || ''));
+      return div.innerHTML;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadEmployees);
   </script>
 </body>
 </html>
-
-
-
-

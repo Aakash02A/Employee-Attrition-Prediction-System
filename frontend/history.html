@@ -43,13 +43,12 @@
           <div class="user-profile dropdown">
             <div class="d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
               <div class="user-info d-none d-sm-flex me-2">
-                <span class="user-name">Robert Brown</span>
+                <span class="user-name">Admin</span>
                 <span class="user-role">HR Manager</span>
               </div>
-              <img src="https://i.pravatar.cc/150?u=robert" alt="User" class="user-avatar" style="object-fit: cover;">
+              <img src="https://i.pravatar.cc/150?u=admin" alt="User" class="user-avatar" style="object-fit: cover;">
             </div>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-              <li><a class="dropdown-item" href="#">Profile</a></li>
               <li><a class="dropdown-item" href="settings.html">Settings</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Logout</a></li>
@@ -63,10 +62,13 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Prediction History</h1>
-            <div class="page-subtitle">Log of all historical ML predictions.</div>
+            <div class="page-subtitle">Complete log of all historical ML prediction runs.</div>
           </div>
-          <button class="btn btn-outline-secondary"><i class="bi bi-download me-1"></i> Export CSV</button>
+          <button class="btn btn-outline-secondary" onclick="exportCSV()"><i class="bi bi-download me-1"></i> Export CSV</button>
         </div>
+
+        <!-- Notification Alert -->
+        <div id="pageAlert" class="alert d-none mb-3" role="alert"></div>
 
         <!-- Filter Bar -->
         <div class="saas-card py-3 mb-4">
@@ -80,12 +82,15 @@
             <div class="col-md-3">
               <select class="form-select form-select-sm" id="filterResult">
                 <option value="All">All Predictions</option>
-                <option value="Leave">Leave</option>
-                <option value="Stay">Stay</option>
+                <option value="LEAVE">Leave</option>
+                <option value="STAY">Stay</option>
               </select>
             </div>
             <div class="col-md-3">
               <input type="date" class="form-control form-control-sm" id="filterDate">
+            </div>
+            <div class="col-md-auto ms-auto">
+              <button class="btn btn-outline-secondary btn-sm" onclick="loadHistory()"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
             </div>
           </div>
         </div>
@@ -95,16 +100,21 @@
             <table class="table table-hover mb-0" id="historyTable">
               <thead>
                 <tr>
-                  <th>Date</th>
+                  <th>Date & Time</th>
                   <th>Employee Code</th>
                   <th>Prediction</th>
                   <th>Probability</th>
+                  <th>Risk Level</th>
                   <th>Model Version</th>
                   <th>Requested By</th>
                 </tr>
               </thead>
               <tbody id="historyTableBody">
-                <!-- Populated via JS -->
+                <tr>
+                  <td colspan="7" class="text-center py-5 text-muted">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span> Loading prediction history...
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -112,7 +122,7 @@
         
         <!-- Pagination -->
         <nav aria-label="Page navigation" class="d-flex justify-content-between align-items-center">
-          <div class="text-muted small" id="pageInfo">Showing 1 to 10 of 15 entries</div>
+          <div class="text-muted small" id="pageInfo">Showing 0 entries</div>
           <ul class="pagination pagination-sm mb-0">
             <li class="page-item disabled" id="btnPrev"><a class="page-link" href="#" onclick="event.preventDefault(); changePage(-1)">Previous</a></li>
             <li class="page-item active"><a class="page-link" href="#" id="pageNum">1</a></li>
@@ -125,104 +135,158 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/app.js"></script>
   
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const allHistory = window.MockData.history;
-      let currentData = [...allHistory];
+    Auth.requireLogin();
+
+    let allHistory = [];
+    let currentData = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    const tbody = document.getElementById('historyTableBody');
+    const searchEmp = document.getElementById('searchEmp');
+    const filterResult = document.getElementById('filterResult');
+    const filterDate = document.getElementById('filterDate');
+
+    async function loadHistory() {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span> Loading history from backend...
+          </td>
+        </tr>`;
+
+      try {
+        allHistory = await Api.getPredictions();
+        applyFilters();
+      } catch (err) {
+        showPageAlert('danger', 'Failed to load prediction history: ' + escapeHtml(err.message));
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Error: ${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+
+    function renderTable() {
+      tbody.innerHTML = '';
       
-      const tbody = document.getElementById('historyTableBody');
-      const searchEmp = document.getElementById('searchEmp');
-      const filterResult = document.getElementById('filterResult');
-      const filterDate = document.getElementById('filterDate');
+      const total = currentData.length;
+      const totalPages = Math.ceil(total / itemsPerPage);
       
-      // Pagination state
-      let currentPage = 1;
-      const itemsPerPage = 10;
+      if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
       
-      const renderTable = () => {
-        tbody.innerHTML = '';
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = Math.min(start + itemsPerPage, total);
+      
+      const pageData = currentData.slice(start, end);
+      
+      if (pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted">No prediction history records found.</td></tr>';
+        document.getElementById('pageInfo').textContent = 'Showing 0 entries';
+        document.getElementById('btnPrev').classList.add('disabled');
+        document.getElementById('btnNext').classList.add('disabled');
+        return;
+      }
+      
+      document.getElementById('pageInfo').textContent = `Showing ${start + 1} to ${end} of ${total} entries`;
+      document.getElementById('pageNum').textContent = currentPage;
+      
+      document.getElementById('btnPrev').classList.toggle('disabled', currentPage === 1);
+      document.getElementById('btnNext').classList.toggle('disabled', currentPage >= totalPages);
+      
+      pageData.forEach(item => {
+        const isLeave = item.prediction === 'LEAVE';
+        const predClass = isLeave ? 'text-danger fw-bold' : 'text-success fw-bold';
+        const pct = Math.round((item.probability || 0) * 100);
+        const badgeCls = item.riskLevel === 'HIGH' ? 'badge-high' : (item.riskLevel === 'MEDIUM' ? 'badge-med' : 'badge-low');
         
-        // Paging logic
-        const total = currentData.length;
-        const totalPages = Math.ceil(total / itemsPerPage);
-        
-        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-        
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = Math.min(start + itemsPerPage, total);
-        
-        const pageData = currentData.slice(start, end);
-        
-        if (pageData.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No history records found.</td></tr>';
-          document.getElementById('pageInfo').textContent = 'Showing 0 entries';
-          document.getElementById('btnPrev').classList.add('disabled');
-          document.getElementById('btnNext').classList.add('disabled');
-          return;
+        let dateStr = '-';
+        if (item.createdAt) {
+          const d = new Date(item.createdAt);
+          dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
-        
-        document.getElementById('pageInfo').textContent = `Showing ${start + 1} to ${end} of ${total} entries`;
-        document.getElementById('pageNum').textContent = currentPage;
-        
-        document.getElementById('btnPrev').classList.toggle('disabled', currentPage === 1);
-        document.getElementById('btnNext').classList.toggle('disabled', currentPage === totalPages);
-        
-        pageData.forEach(item => {
-          const isLeave = item.prediction.includes('Leave');
-          const predClass = isLeave ? 'text-danger fw-bold' : 'text-success fw-bold';
-          
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${item.date}</td>
-            <td class="fw-bold text-dark">${item.empCode}</td>
-            <td class="${predClass}">${item.prediction}</td>
-            <td>${item.probability}%</td>
-            <td class="text-muted">${item.modelVersion}</td>
-            <td>${item.requestedBy}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      };
-      
-      window.changePage = (dir) => {
-        currentPage += dir;
-        renderTable();
-      };
-      
-      // Filtering logic
-      const applyFilters = () => {
-        const search = searchEmp.value.toLowerCase();
-        const res = filterResult.value;
-        const date = filterDate.value; // yyyy-mm-dd, matches item.date format
-        
-        let filtered = allHistory;
-        
-        if (search) {
-          filtered = filtered.filter(h => h.empCode.toLowerCase().includes(search));
-        }
-        if (res !== 'All') {
-          filtered = filtered.filter(h => h.prediction.includes(res));
-        }
-        if (date) {
-          filtered = filtered.filter(h => h.date === date);
-        }
-        
-        currentData = filtered;
-        currentPage = 1; // Reset to page 1 on filter change
-        renderTable();
-      };
-      
-      searchEmp.addEventListener('input', applyFilters);
-      filterResult.addEventListener('change', applyFilters);
-      filterDate.addEventListener('change', applyFilters);
-      
-      // Initial render
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${dateStr}</td>
+          <td class="fw-bold text-dark">${escapeHtml(item.empCode || '#' + item.employeeId)}</td>
+          <td class="${predClass}">${isLeave ? 'Leave' : 'Stay'}</td>
+          <td>${pct}%</td>
+          <td><span class="badge ${badgeCls}">${item.riskLevel || '-'}</span></td>
+          <td class="text-muted small">${escapeHtml(item.modelVersion || '-')}</td>
+          <td class="small">${escapeHtml(item.requestedBy || 'admin')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function changePage(dir) {
+      currentPage += dir;
       renderTable();
-    });
+    }
+
+    function applyFilters() {
+      const search = searchEmp.value.toLowerCase().trim();
+      const res = filterResult.value;
+      const date = filterDate.value; // YYYY-MM-DD
+      
+      let filtered = [...allHistory];
+      
+      if (search) {
+        filtered = filtered.filter(h => 
+          (h.empCode && h.empCode.toLowerCase().includes(search)) ||
+          (h.employeeDepartment && h.employeeDepartment.toLowerCase().includes(search))
+        );
+      }
+      if (res !== 'All') {
+        filtered = filtered.filter(h => h.prediction === res);
+      }
+      if (date) {
+        filtered = filtered.filter(h => {
+          if (!h.createdAt) return false;
+          return h.createdAt.startsWith(date);
+        });
+      }
+      
+      currentData = filtered;
+      currentPage = 1;
+      renderTable();
+    }
+
+    searchEmp.addEventListener('input', applyFilters);
+    filterResult.addEventListener('change', applyFilters);
+    filterDate.addEventListener('change', applyFilters);
+
+    function exportCSV() {
+      if (currentData.length === 0) return;
+      let csv = 'CreatedAt,EmployeeCode,Prediction,Probability,RiskLevel,ModelVersion,RequestedBy\n';
+      currentData.forEach(row => {
+        csv += `"${row.createdAt || ''}","${row.empCode || ''}","${row.prediction || ''}",${row.probability || 0},"${row.riskLevel || ''}","${row.modelVersion || ''}","${row.requestedBy || ''}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', `prediction_history_${new Date().toISOString().slice(0,10)}.csv`);
+      a.click();
+    }
+
+    function showPageAlert(type, message) {
+      const alert = document.getElementById('pageAlert');
+      alert.className = `alert alert-${type}`;
+      alert.innerHTML = message;
+      alert.classList.remove('d-none');
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(str || ''));
+      return div.innerHTML;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadHistory);
   </script>
 </body>
 </html>

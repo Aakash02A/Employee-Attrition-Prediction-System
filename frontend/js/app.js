@@ -43,14 +43,27 @@ function initSidebar() {
     }
   });
 
-  // Mock Logout
+  // User info & Logout
+  if (typeof Auth !== 'undefined') {
+    const user = Auth.getUser();
+    if (user) {
+      const nameEl = document.querySelector('.user-name');
+      const roleEl = document.querySelector('.user-role');
+      if (nameEl) nameEl.textContent = user.fullName || user.email || 'Admin';
+      if (roleEl) roleEl.textContent = user.role || 'HR Admin';
+    }
+  }
+
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      // Simulate clearing session
-      console.log('Logging out...');
-      window.location.href = 'login.html';
+      if (typeof Auth !== 'undefined') {
+        Auth.logout();
+      } else {
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+      }
     });
   }
 }

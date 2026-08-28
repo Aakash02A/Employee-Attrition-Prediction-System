@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="css/styles.css">
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');document.documentElement.setAttribute('data-bs-theme', 'dark');}</script>
+  <script>if(localStorage.getItem('theme')==='dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme', 'dark');document.documentElement.setAttribute('data-bs-theme', 'dark');}</script>
 </head>
 <body>
 
@@ -45,13 +45,12 @@
           <div class="user-profile dropdown">
             <div class="d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false">
               <div class="user-info d-none d-sm-flex me-2">
-                <span class="user-name">Robert Brown</span>
+                <span class="user-name">Admin</span>
                 <span class="user-role">HR Manager</span>
               </div>
-              <img src="https://i.pravatar.cc/150?u=robert" alt="User" class="user-avatar" style="object-fit: cover;">
+              <img src="https://i.pravatar.cc/150?u=admin" alt="User" class="user-avatar" style="object-fit: cover;">
             </div>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-              <li><a class="dropdown-item" href="#">Profile</a></li>
               <li><a class="dropdown-item" href="settings.html">Settings</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Logout</a></li>
@@ -65,38 +64,14 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Analytics</h1>
-            <div class="page-subtitle">Detailed breakdown of attrition drivers across the organization.</div>
+            <div class="page-subtitle">Detailed breakdown of attrition drivers generated from backend predictions.</div>
           </div>
-        </div>
-        
-        <!-- Filter Bar -->
-        <div class="saas-card py-3 mb-4">
-          <div class="row g-3 align-items-center">
-            <div class="col-md-auto fw-bold text-dark me-2">
-              <i class="bi bi-funnel me-1"></i> Filters
-            </div>
-            <div class="col-md-3">
-              <select class="form-select form-select-sm">
-                <option value="">All Departments</option>
-                <option>Sales</option>
-                <option>Research & Development</option>
-                <option>Human Resources</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <select class="form-select form-select-sm">
-                <option value="">Date Range: YTD</option>
-                <option>Last 30 Days</option>
-                <option>Last Quarter</option>
-                <option>Last Year</option>
-              </select>
-            </div>
-            <div class="col-md-auto ms-auto">
-              <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-download me-1"></i> Export PDF</button>
-            </div>
-          </div>
+          <button class="btn btn-outline-secondary btn-sm" onclick="loadAllAnalytics()"><i class="bi bi-arrow-clockwise me-1"></i> Refresh Analytics</button>
         </div>
 
+        <!-- Notification Alert -->
+        <div id="analyticsAlert" class="alert d-none mb-3" role="alert"></div>
+        
         <div class="content-grid no-right-panel">
           
           <!-- Analytics Charts Grid -->
@@ -159,112 +134,136 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/app.js"></script>
   
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    Auth.requireLogin();
+
+    let chartInstances = {};
+
+    document.addEventListener('DOMContentLoaded', loadAllAnalytics);
+
+    async function loadAllAnalytics() {
       Chart.defaults.font.family = 'Inter';
       Chart.defaults.color = '#718096';
-
-      // Pulled from the shared MockData source (js/mock-data.js) so this
-      // page stays in sync with the rest of the app. In Phase 3+, replace
-      // window.MockData.analytics with the response from /api/analytics/*.
-      const a = window.MockData.analytics;
 
       const commonOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-          y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+          y: { beginAtZero: true, grid: { borderDash: [5, 5] }, ticks: { stepSize: 1 } },
           x: { grid: { display: false } }
         }
       };
 
-      // 1. Dept
-      new Chart(document.getElementById('chartDept'), {
-        type: 'bar',
-        data: {
-          labels: a.byDepartment.labels,
-          datasets: [{ data: a.byDepartment.data, backgroundColor: '#ff6b00', borderRadius: 4 }]
-        },
-        options: commonOptions
-      });
+      try {
+        const [
+          byDept,
+          byRole,
+          byAge,
+          bySalary,
+          byOvertime,
+          bySatisfaction,
+          byYears
+        ] = await Promise.all([
+          Api.getAttritionByDepartment(),
+          Api.getAttritionByJobRole(),
+          Api.getAttritionByAgeGroup(),
+          Api.getAttritionBySalaryRange(),
+          Api.getAttritionByOvertime(),
+          Api.getAttritionByJobSatisfaction(),
+          Api.getAttritionByYearsAtCompany(),
+        ]);
 
-      // 2. Role
-      new Chart(document.getElementById('chartRole'), {
-        type: 'bar',
-        data: {
-          labels: a.byRole.labels,
-          datasets: [{ data: a.byRole.data, backgroundColor: '#f59e0b', borderRadius: 4 }]
-        },
-        options: commonOptions
-      });
+        // Destroy previous instances if refreshing
+        Object.values(chartInstances).forEach(c => c.destroy());
+        chartInstances = {};
 
-      // 3. Age Group
-      new Chart(document.getElementById('chartAge'), {
-        type: 'bar',
-        data: {
-          labels: a.byAgeGroup.labels,
-          datasets: [{ data: a.byAgeGroup.data, backgroundColor: '#10b981', borderRadius: 4 }]
-        },
-        options: commonOptions
-      });
+        // 1. Dept
+        chartInstances.dept = new Chart(document.getElementById('chartDept'), {
+          type: 'bar',
+          data: {
+            labels: byDept.labels || [],
+            datasets: [{ data: byDept.data || [], backgroundColor: '#ff6b00', borderRadius: 4 }]
+          },
+          options: commonOptions
+        });
 
-      // 4. Salary Range
-      new Chart(document.getElementById('chartSalary'), {
-        type: 'bar',
-        data: {
-          labels: a.bySalaryRange.labels,
-          datasets: [{ data: a.bySalaryRange.data, backgroundColor: '#6366f1', borderRadius: 4 }]
-        },
-        options: commonOptions
-      });
+        // 2. Role
+        chartInstances.role = new Chart(document.getElementById('chartRole'), {
+          type: 'bar',
+          data: {
+            labels: byRole.labels || [],
+            datasets: [{ data: byRole.data || [], backgroundColor: '#f59e0b', borderRadius: 4 }]
+          },
+          options: commonOptions
+        });
 
-      // 5. Overtime (Grouped Bar)
-      new Chart(document.getElementById('chartOvertime'), {
-        type: 'bar',
-        data: {
-          labels: a.byOvertime.labels,
-          datasets: [
-            { label: 'Left', data: a.byOvertime.left, backgroundColor: '#ef4444', borderRadius: 4 },
-            { label: 'Stayed', data: a.byOvertime.stayed, backgroundColor: '#e2e8f0', borderRadius: 4 }
-          ]
-        },
-        options: {
-          ...commonOptions,
-          plugins: { legend: { display: true, position: 'top' } }
-        }
-      });
+        // 3. Age Group
+        chartInstances.age = new Chart(document.getElementById('chartAge'), {
+          type: 'bar',
+          data: {
+            labels: byAge.labels || [],
+            datasets: [{ data: byAge.data || [], backgroundColor: '#10b981', borderRadius: 4 }]
+          },
+          options: commonOptions
+        });
 
-      // 6. Job Satisfaction
-      new Chart(document.getElementById('chartSatisfaction'), {
-        type: 'bar',
-        data: {
-          labels: a.byJobSatisfaction.labels,
-          datasets: [{ data: a.byJobSatisfaction.data, backgroundColor: '#8b5cf6', borderRadius: 4 }]
-        },
-        options: commonOptions
-      });
+        // 4. Salary Range
+        chartInstances.salary = new Chart(document.getElementById('chartSalary'), {
+          type: 'bar',
+          data: {
+            labels: bySalary.labels || [],
+            datasets: [{ data: bySalary.data || [], backgroundColor: '#6366f1', borderRadius: 4 }]
+          },
+          options: commonOptions
+        });
 
-      // 7. Years at Company
-      new Chart(document.getElementById('chartYears'), {
-        type: 'bar',
-        data: {
-          labels: a.byYearsAtCompany.labels,
-          datasets: [
-            { label: 'Attrition', data: a.byYearsAtCompany.data, backgroundColor: '#ff6b00', borderRadius: 4 }
-          ]
-        },
-        options: commonOptions
-      });
-      
-    });
+        // 5. Overtime
+        chartInstances.overtime = new Chart(document.getElementById('chartOvertime'), {
+          type: 'bar',
+          data: {
+            labels: byOvertime.labels || [],
+            datasets: [{ data: byOvertime.data || [], backgroundColor: '#ef4444', borderRadius: 4 }]
+          },
+          options: commonOptions
+        });
+
+        // 6. Job Satisfaction
+        chartInstances.satisfaction = new Chart(document.getElementById('chartSatisfaction'), {
+          type: 'bar',
+          data: {
+            labels: bySatisfaction.labels || [],
+            datasets: [{ data: bySatisfaction.data || [], backgroundColor: '#8b5cf6', borderRadius: 4 }]
+          },
+          options: commonOptions
+        });
+
+        // 7. Years at Company
+        chartInstances.years = new Chart(document.getElementById('chartYears'), {
+          type: 'bar',
+          data: {
+            labels: byYears.labels || [],
+            datasets: [{ label: 'Attrition', data: byYears.data || [], backgroundColor: '#ff6b00', borderRadius: 4 }]
+          },
+          options: commonOptions
+        });
+
+      } catch (err) {
+        const alert = document.getElementById('analyticsAlert');
+        alert.className = 'alert alert-danger';
+        alert.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i>Failed to load analytics: ${escapeHtml(err.message)}`;
+        alert.classList.remove('d-none');
+      }
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(str || ''));
+      return div.innerHTML;
+    }
   </script>
 </body>
 </html>
-
-
-
-
