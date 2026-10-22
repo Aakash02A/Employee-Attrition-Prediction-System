@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Local configuration and sensitive input
+.env
+.env.*
+!.env.example
+data/raw/*.csv
+data/processed/*
+!data/processed/.gitkeep
+
+# Locally generated models/reports may contain data-derived artifacts
+models/*
+!models/.gitkeep
+reports/*
+!reports/.gitkeep
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
