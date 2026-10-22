@@ -44,5 +44,11 @@ def test_quality_report_keeps_duplicate_rows_and_reports_missing():
 def test_malformed_and_empty_csv_have_readable_errors():
     with pytest.raises(DataValidationError, match="empty"):
         load_csv(StringIO(""))
-    with pytest.raises(DataValidationError):
+    with pytest.raises(DataValidationError, match="Malformed CSV"):
         load_csv(StringIO("a,b\n1,2,3\n"))
+
+
+def test_csv_preserves_quoted_values_and_missing_cells():
+    frame = load_csv(StringIO('Department,Note\nSales,"Includes, commas"\nResearch,\n'))
+    assert frame["Note"].iloc[0] == "Includes, commas"
+    assert pd.isna(frame["Note"].iloc[1])

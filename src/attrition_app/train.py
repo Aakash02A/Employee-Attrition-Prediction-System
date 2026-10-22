@@ -6,7 +6,7 @@ import json
 import logging
 import platform
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import joblib
@@ -114,7 +114,7 @@ def train_model(data_path: str | Path = DEFAULT_DATA_PATH, *, model_path: str | 
         "importance_std": importance_result.importances_std,
     }).sort_values("importance_mean", ascending=False)
 
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(UTC).isoformat()
     metadata = {
         "model_id": selected_name.lower().replace(" ", "_"), "model_name": selected_name,
         "trained_at_utc": timestamp, "random_seed": seed,

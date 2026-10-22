@@ -1,6 +1,7 @@
 """CSV ingestion and dataset validation without silently dropping records."""
 from __future__ import annotations
 
+import warnings
 from dataclasses import asdict, dataclass
 from io import BytesIO
 from pathlib import Path
@@ -38,7 +39,9 @@ def _read_csv(source: str | Path | BinaryIO | BytesIO) -> pd.DataFrame:
         try:
             if hasattr(source, "seek"):
                 source.seek(0)
-            frame = pd.read_csv(source, encoding=encoding)
+            with warnings.catch_warnings():
+                warnings.simplefilter("error", pd.errors.ParserWarning)
+                frame = pd.read_csv(source, encoding=encoding, index_col=False)
             if frame.empty and len(frame.columns) == 0:
                 raise DataValidationError("The CSV is empty. Add a header row and at least one record.")
             if frame.shape[1] == 0:
@@ -48,6 +51,8 @@ def _read_csv(source: str | Path | BinaryIO | BytesIO) -> pd.DataFrame:
             errors.append(str(exc))
         except pd.errors.EmptyDataError as exc:
             raise DataValidationError("The CSV is empty. Add a header row and at least one record.") from exc
+        except pd.errors.ParserWarning as exc:
+            raise DataValidationError(f"Malformed CSV: {exc}") from exc
         except pd.errors.ParserError as exc:
             raise DataValidationError(f"Malformed CSV: {exc}") from exc
         except DataValidationError:

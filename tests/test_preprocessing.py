@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 

@@ -18,7 +18,7 @@ An educational, reproducible people-analytics application for exploring historic
 
 ## Technology
 
-Python 3.11+, Pandas/NumPy for data, scikit-learn for preprocessing and models, Streamlit for UI, Plotly for interactive charts, Joblib for locally generated trusted artifacts, Pytest and Ruff for QA.
+Python 3.11+ (CI checks Python 3.11 and 3.13), Pandas/NumPy for data, scikit-learn for preprocessing and models, Streamlit for UI, Plotly for interactive charts, Joblib for locally generated trusted artifacts, Pytest and Ruff for QA.
 
 ## Dataset
 
@@ -31,22 +31,25 @@ Place the CSV at `data/raw/WA_Fn-UseC_-HR-Employee-Attrition.csv`, or pass a dif
 Windows PowerShell:
 
 ```powershell
-py -3.11 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
+py -0p
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.\.venv\Scripts\python.exe -m streamlit run app.py
 ```
 
 macOS/Linux:
 
 ```bash
-python3.11 -m venv .venv
+python3 --version  # 3.11 or newer
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e '.[dev]'
+python -m streamlit run app.py
 ```
 
-If you prefer the requirements file, run `python -m pip install -r requirements.txt` and then `python -m pip install -e .` so the local `src` package is importable by the training module.
+The Windows `py -m venv` command uses the Python launcher’s default installed runtime; `py -0p` lists installed versions. If you need a specific interpreter, replace it with (for example) `py -3.11 -m venv .venv`. Activation is optional during installation because the commands above call the virtual environment's interpreter directly. For the commands in the next section, either activate it with `.\.venv\Scripts\Activate.ps1` or replace `python` with `.\.venv\Scripts\python.exe`. If you prefer the requirements file, install it with that same interpreter and then run `python -m pip install -e .` so the local `src` package is importable.
 
 ## Validate, train, and run
 
@@ -55,11 +58,13 @@ Run from the repository root after installation.
 ```bash
 python scripts/validate_dataset.py --input data/raw/WA_Fn-UseC_-HR-Employee-Attrition.csv
 python -m attrition_app.train --data data/raw/WA_Fn-UseC_-HR-Employee-Attrition.csv
-streamlit run app.py
+python -m streamlit run app.py
 pytest -q
 ruff check .
 ruff format .
 ```
+
+The commands in this section assume the virtual environment is active. If the `streamlit` executable is not on `PATH`, use `python -m streamlit run app.py` as shown. To start the app without a dataset or trained model, run only that launch command; the app opens with setup guidance. Prediction and model evaluation become available after training a model.
 
 ### Smoke-test without the IBM CSV
 
@@ -69,7 +74,7 @@ Generate a deterministic toy CSV (not real employee data and not representative 
 python scripts/generate_synthetic_data.py --rows 200 --seed 42 --output data/raw/synthetic_attrition.csv
 python scripts/validate_dataset.py --input data/raw/synthetic_attrition.csv
 python -m attrition_app.train --data data/raw/synthetic_attrition.csv
-streamlit run app.py
+python -m streamlit run app.py
 ```
 
 The synthetic generator includes the fields used by the default pipeline and deliberately creates a target signal for exercising the code path. Resulting model metrics only describe this generated toy sample; they are not evidence of performance on the IBM dataset or real employees. The automated tests also generate a deterministic 160-row fixture in memory/temp storage and do not require Kaggle or the raw CSV. Re-run the generator with `--force` only when you intend to replace its output file. To test code without creating a model artifact, run `pytest -q` instead; the integration fixture writes artifacts under pytest's temporary directory.
@@ -103,6 +108,7 @@ pages/                         Explorer, prediction, performance, explanations, 
 src/attrition_app/              Data, preprocessing, training, evaluation, inference, EDA
 scripts/validate_dataset.py     Standalone CSV validator
 tests/                          Synthetic unit/integration tests
+.github/workflows/ci.yml        Automated tests and lint checks on Python 3.11/3.13
 data/raw/                       User-supplied local dataset (ignored)
 models/                          Local model artifact (ignored)
 reports/                         Local training reports (ignored)
