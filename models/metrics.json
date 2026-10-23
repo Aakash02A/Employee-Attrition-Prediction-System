@@ -1,0 +1,201 @@
+{
+  "model": "LogisticRegression",
+  "threshold": 0.3915761122443378,
+  "candidates_cv": {
+    "LogisticRegression": {
+      "cv_roc_auc": 0.835368848083698,
+      "cv_average_precision": 0.6353390712478296,
+      "seconds": 0.2
+    },
+    "RandomForest": {
+      "cv_roc_auc": 0.7998238496850647,
+      "cv_average_precision": 0.5416267205657038,
+      "seconds": 5.1
+    },
+    "GradientBoosting": {
+      "cv_roc_auc": 0.8212821607771966,
+      "cv_average_precision": 0.5948914151340249,
+      "seconds": 2.9
+    }
+  },
+  "holdout_real_only": {
+    "accuracy": 0.8707482993197279,
+    "precision": 0.6363636363636364,
+    "recall": 0.44680851063829785,
+    "f1": 0.525,
+    "roc_auc": 0.8005857524334568,
+    "average_precision": 0.5910128609269609,
+    "confusion_matrix": {
+      "tn": 235,
+      "fp": 12,
+      "fn": 26,
+      "tp": 21
+    }
+  },
+  "holdout_final": {
+    "accuracy": 0.8571428571428571,
+    "precision": 0.5806451612903226,
+    "recall": 0.3829787234042553,
+    "f1": 0.46153846153846156,
+    "roc_auc": 0.79782927039366,
+    "average_precision": 0.5712295069284584,
+    "confusion_matrix": {
+      "tn": 234,
+      "fp": 13,
+      "fn": 29,
+      "tp": 18
+    }
+  },
+  "importance": [
+    {
+      "feature": "OverTime",
+      "importance": 0.25356106874119266,
+      "std": 0.029762436312344126
+    },
+    {
+      "feature": "JobSatisfaction",
+      "importance": 0.07475483175722546,
+      "std": 0.01924845859741096
+    },
+    {
+      "feature": "TotalWorkingYears",
+      "importance": 0.05959514980033596,
+      "std": 0.032472977404710446
+    },
+    {
+      "feature": "NumCompaniesWorked",
+      "importance": 0.03708528434280911,
+      "std": 0.010135130784448297
+    },
+    {
+      "feature": "YearsSinceLastPromotion",
+      "importance": 0.029771353665669735,
+      "std": 0.022234019134739474
+    },
+    {
+      "feature": "StockOptionLevel",
+      "importance": 0.027964041238032745,
+      "std": 0.020169247711464205
+    },
+    {
+      "feature": "JobRole",
+      "importance": 0.026137141039089463,
+      "std": 0.028858445458440067
+    },
+    {
+      "feature": "EnvironmentSatisfaction",
+      "importance": 0.025902806493978553,
+      "std": 0.022495580254164184
+    },
+    {
+      "feature": "JobInvolvement",
+      "importance": 0.02243693330791351,
+      "std": 0.013577436599534866
+    },
+    {
+      "feature": "YearsWithCurrManager",
+      "importance": 0.01984913973041259,
+      "std": 0.018450008996922417
+    },
+    {
+      "feature": "YearsInCurrentRole",
+      "importance": 0.018129425235151063,
+      "std": 0.01855954445206862
+    },
+    {
+      "feature": "DistanceFromHome",
+      "importance": 0.01785701614088269,
+      "std": 0.016104773391434284
+    },
+    {
+      "feature": "BusinessTravel",
+      "importance": 0.01572318218076041,
+      "std": 0.016128808308329787
+    },
+    {
+      "feature": "PerformanceRating",
+      "importance": 0.008945398906277602,
+      "std": 0.007587357311814263
+    },
+    {
+      "feature": "RelationshipSatisfaction",
+      "importance": 0.008569083552592083,
+      "std": 0.00979163415969894
+    },
+    {
+      "feature": "JobLevel",
+      "importance": 0.008157328522539453,
+      "std": 0.021089381108013547
+    },
+    {
+      "feature": "TrainingTimesLastYear",
+      "importance": 0.0075512133943525465,
+      "std": 0.002804645905941633
+    },
+    {
+      "feature": "MonthlyIncome",
+      "importance": 0.006237785687790593,
+      "std": 0.007713692755280364
+    },
+    {
+      "feature": "YearsAtCompany",
+      "importance": 0.004160123862972409,
+      "std": 0.013751452265953137
+    },
+    {
+      "feature": "WorkLifeBalance",
+      "importance": 0.002961280892475204,
+      "std": 0.00858830601932247
+    },
+    {
+      "feature": "DailyRate",
+      "importance": 0.002307509056743884,
+      "std": 0.0029166492362451726
+    },
+    {
+      "feature": "Department",
+      "importance": 0.002273108791691414,
+      "std": 0.020795228650371176
+    },
+    {
+      "feature": "HourlyRate",
+      "importance": 0.0007145387332785136,
+      "std": 0.0006969979739798745
+    },
+    {
+      "feature": "MonthlyRate",
+      "importance": 0.0004991308559757213,
+      "std": 0.002409018804180123
+    },
+    {
+      "feature": "Education",
+      "importance": -9.060621044266748e-05,
+      "std": 0.0004710614256284729
+    },
+    {
+      "feature": "PercentSalaryHike",
+      "importance": -0.0013302613597949875,
+      "std": 0.00830229086285098
+    },
+    {
+      "feature": "EducationField",
+      "importance": -0.021206840007428264,
+      "std": 0.014403300958463658
+    }
+  ],
+  "seed": 42,
+  "real_weight": 5.0,
+  "n_real_train": 1176,
+  "n_synthetic": 12000,
+  "n_holdout": 294,
+  "excluded_columns": [
+    "Age",
+    "Attrition",
+    "EmployeeCount",
+    "EmployeeNumber",
+    "Gender",
+    "MaritalStatus",
+    "Over18",
+    "StandardHours"
+  ]
+}

@@ -1,28 +1,16 @@
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
+# Virtual environments
 .venv/
 venv/
+env/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Test / tooling caches
 .pytest_cache/
-.ruff_cache/
 
-# Local configuration and sensitive input
+# Secrets and local config
 .env
-.env.*
-!.env.example
-data/raw/*.csv
-data/processed/*
-!data/processed/.gitkeep
-
-# Locally generated models/reports may contain data-derived artifacts
-models/*
-!models/.gitkeep
-reports/*
-!reports/.gitkeep
-
-# OS/editor
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+.streamlit/secrets.toml
